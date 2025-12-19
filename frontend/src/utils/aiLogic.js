@@ -49,3 +49,4 @@ export const explainableWorkshop = ({ mood, timeOfDay }) => {
   return { title, reasoning };
 };
 
+

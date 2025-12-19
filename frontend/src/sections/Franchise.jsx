@@ -94,3 +94,4 @@ const Franchise = () => {
 
 export default Franchise;
 
+

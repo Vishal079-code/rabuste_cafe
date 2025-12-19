@@ -37,3 +37,4 @@ const CoffeeMenu = ({ coffees, loading }) => {
 
 export default CoffeeMenu;
 
+

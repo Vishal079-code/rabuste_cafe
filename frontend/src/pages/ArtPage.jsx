@@ -38,3 +38,4 @@ const ArtPage = () => {
 
 export default ArtPage;
 
+

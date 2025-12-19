@@ -13,6 +13,8 @@ export const fetchInsights = () => api.get('/api/insights/popular');
 export const aiCoffee = (payload) => api.post('/api/ai/coffee', payload);
 export const aiArt = (payload) => api.post('/api/ai/art', payload);
 export const aiWorkshop = (payload) => api.post('/api/ai/workshop', payload);
+export const fetchMenuImages = () => api.get('/api/images');
 
 export default api;
+
 

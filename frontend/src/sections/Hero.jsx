@@ -1,9 +1,18 @@
 import { Link } from 'react-router-dom';
 
-const Hero = () => {
+const Hero = ({ primaryLogo }) => {
   return (
     <section id="hero">
       <div className="hero">
+        {primaryLogo && (
+          <div className="hero-logo-container">
+            <img 
+              src={primaryLogo.url} 
+              alt="Rabuste Logo" 
+              className="hero-logo"
+            />
+          </div>
+        )}
         <p className="section-kicker">Robusta-only. Coffee × Art × Tech</p>
         <h1>Rabuste is a cozy, bold home for people who like their coffee loud.</h1>
         <p>
