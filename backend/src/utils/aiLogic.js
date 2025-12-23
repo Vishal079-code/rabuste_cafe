@@ -64,3 +64,5 @@ const suggestWorkshop = ({ timeOfDay = 'afternoon', vibe = 'creative' }) => {
 module.exports = { suggestCoffee, suggestArt, suggestWorkshop };
 
 
+
+

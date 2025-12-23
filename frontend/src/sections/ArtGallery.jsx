@@ -62,3 +62,5 @@ const ArtGallery = ({ art, loading, insights }) => {
 export default ArtGallery;
 
 
+
+

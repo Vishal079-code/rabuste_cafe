@@ -46,3 +46,5 @@ npm run dev             # starts http://localhost:5173
 Seed script loads signature robusta drinks, three art pieces with pricing/availability, and workshops with seat counts to demo validation and insights.
 
 
+
+

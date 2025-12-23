@@ -13,3 +13,5 @@ const FranchisePage = () => {
 export default FranchisePage;
 
 
+
+

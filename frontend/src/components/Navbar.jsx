@@ -1,7 +1,16 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import '../styles/navbar.css';
 
 const Navbar = () => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
   return (
     <header className="top-bar">
       <NavLink to="/" className="logo">
@@ -45,6 +54,35 @@ const Navbar = () => {
         >
           Franchise
         </NavLink>
+        {!user && (
+          <>
+            <NavLink
+              to="/login"
+              className={({ isActive }) => `nav-button ${isActive ? 'active' : ''}`}
+            >
+              Login
+            </NavLink>
+            <NavLink
+              to="/signup"
+              className={({ isActive }) => `nav-button ${isActive ? 'active' : ''}`}
+            >
+              Signup
+            </NavLink>
+          </>
+        )}
+        {user && user.role === 'admin' && (
+          <NavLink
+            to="/admin"
+            className={({ isActive }) => `nav-button ${isActive ? 'active' : ''}`}
+          >
+            Admin
+          </NavLink>
+        )}
+        {user && (
+          <button type="button" className="nav-button outline" onClick={handleLogout}>
+            Logout
+          </button>
+        )}
       </nav>
     </header>
   );

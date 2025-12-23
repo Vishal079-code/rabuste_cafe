@@ -58,26 +58,77 @@ const HomePage = () => {
   const primaryLogo = logos.length > 0 ? logos[0] : null;
   const secondaryLogo = logos.length > 1 ? logos[1] : null;
 
+  // Set up scroll animations for sections (only on HomePage)
+  useEffect(() => {
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px',
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('scroll-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    // Only observe sections with data-scroll-section attribute (HomePage specific)
+    const sections = document.querySelectorAll('.page [data-scroll-section]');
+    sections.forEach((section) => observer.observe(section));
+
+    // Fallback: make sections visible after a short delay if observer hasn't triggered
+    const fallbackTimeout = setTimeout(() => {
+      sections.forEach((section) => {
+        if (!section.classList.contains('scroll-visible')) {
+          section.classList.add('scroll-visible');
+        }
+      });
+    }, 500);
+
+    return () => {
+      sections.forEach((section) => observer.unobserve(section));
+      clearTimeout(fallbackTimeout);
+    };
+  }, []);
+
   return (
     <div className="page">
       {error && <div className="toast error">{error}</div>}
       <Hero primaryLogo={primaryLogo} />
       {secondaryLogo && (
-        <section style={{ padding: '32px 18px', textAlign: 'center' }}>
-          <img 
-            src={secondaryLogo.url} 
-            alt="Rabuste Logo" 
-            className="secondary-logo"
-          />
-        </section>
+        <div data-scroll-section>
+          <section style={{ padding: '32px 18px', textAlign: 'center' }}>
+            <img 
+              src={secondaryLogo.url} 
+              alt="Rabuste Logo" 
+              className="secondary-logo"
+            />
+          </section>
+        </div>
       )}
-      <WhyRobusta />
-      <CoffeeMenu coffees={coffee} loading={loading} />
-      <ArtGallery art={art} loading={loading} insights={insights} />
-      <Workshops workshops={workshops} loading={loading} />
-      <Franchise />
-      <AIExperience coffees={coffee} art={art} workshops={workshops} />
-      <Footer />
+      <div data-scroll-section>
+        <WhyRobusta />
+      </div>
+      <div data-scroll-section>
+        <CoffeeMenu coffees={coffee} loading={loading} />
+      </div>
+      <div data-scroll-section>
+        <ArtGallery art={art} loading={loading} insights={insights} />
+      </div>
+      <div data-scroll-section>
+        <Workshops workshops={workshops} loading={loading} />
+      </div>
+      <div data-scroll-section>
+        <Franchise />
+      </div>
+      <div data-scroll-section>
+        <AIExperience coffees={coffee} art={art} workshops={workshops} />
+      </div>
+      <div data-scroll-section>
+        <Footer />
+      </div>
     </div>
   );
 };

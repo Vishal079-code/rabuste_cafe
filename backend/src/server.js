@@ -21,6 +21,8 @@ const insightsRoutes = require('./routes/insightsRoutes');
 const aiRoutes = require('./routes/aiRoutes');
 const menuImageRoutes = require('./routes/menuImageRoutes');
 const imageRoutes = require('./routes/imageRoutes');
+const authRoutes = require('./routes/authRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 app.use(cors());
@@ -35,6 +37,8 @@ app.use('/api/insights', insightsRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/menu-images', menuImageRoutes);
 app.use('/api/images', imageRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.use((err, _req, res, _next) => {
   console.error(err);

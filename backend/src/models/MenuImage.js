@@ -11,3 +11,5 @@ const menuImageSchema = new mongoose.Schema(
 
 module.exports = mongoose.model('MenuImage', menuImageSchema);
 
+
+
