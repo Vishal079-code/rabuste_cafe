@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import gsap from "gsap";
 import "../styles/navbar.css";
@@ -7,131 +7,67 @@ import "../styles/navbar.css";
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const navRootRef = useRef(null);
 
   const handleLogout = () => {
     logout();
     navigate("/");
   };
 
-  /* ================= GSAP HOVER EFFECT ================= */
   useEffect(() => {
-  const ctx = gsap.context(() => {
-    const buttons = document.querySelectorAll(".nav-button");
+    const root = navRootRef.current;
+    if (!root) return;
+
+    const buttons = root.querySelectorAll(".nav-button");
 
     buttons.forEach((btn) => {
       const orb = btn.querySelector(".hover-orb");
       const text = btn.querySelector(".nav-text");
       if (!orb) return;
 
-      // 🔥 FORCE INITIAL STATE EVERY TIME
-      gsap.set(orb, {
-        x: 0,
-        y: 0,
-        scale: 0,
-        opacity: 0,
-      });
-
-      gsap.set(btn, {
-        scale: 1,
-        boxShadow: "0 3px 10px rgba(0,0,0,0.3)",
-      });
-
-      const xTo = gsap.quickTo(orb, "x", {
-        duration: 0.3,
-        ease: "power3.out",
-      });
-
-      const yTo = gsap.quickTo(orb, "y", {
-        duration: 0.3,
-        ease: "power3.out",
-      });
+      const xTo = gsap.quickTo(orb, "x", { duration: 0.25, ease: "power3.out" });
+      const yTo = gsap.quickTo(orb, "y", { duration: 0.25, ease: "power3.out" });
 
       const move = (e) => {
         const rect = btn.getBoundingClientRect();
-        xTo(e.clientX - rect.left - rect.width / 2);
-        yTo(e.clientY - rect.top - rect.height / 2);
+        xTo(e.clientX - rect.left);
+        yTo(e.clientY - rect.top);
 
         gsap.to(orb, {
-          scale: 1.6,
+          scale: 2.2,
           opacity: 1,
-          duration: 0.25,
-          overwrite: "auto",
+          duration: 0.2,
         });
+
+        if (text) gsap.to(text, { color: "#fff", duration: 0.2 });
 
         gsap.to(btn, {
           scale: 1.08,
           boxShadow: "0 0 35px rgba(216,107,50,0.6)",
-          duration: 0.25,
-          overwrite: "auto",
+          duration: 0.2,
         });
-
-        if (text) {
-          gsap.to(text, {
-            color: "#fff",
-            duration: 0.25,
-            overwrite: "auto",
-          });
-        }
       };
 
       const leave = () => {
-        gsap.to(orb, {
-          scale: 0,
-          opacity: 0,
-          duration: 0.35,
-          overwrite: "auto",
-        });
-
-        gsap.to(btn, {
-          scale: 1,
-          boxShadow: "0 3px 10px rgba(0,0,0,0.3)",
-          duration: 0.35,
-          overwrite: "auto",
-        });
-
-        if (text) {
-          gsap.to(text, {
-            color: "#f5efe8",
-            duration: 0.25,
-            overwrite: "auto",
-          });
-        }
+        gsap.to(orb, { scale: 0, opacity: 0, duration: 0.3 });
+        gsap.to(btn, { scale: 1, boxShadow: "0 3px 10px rgba(0,0,0,0.3)" });
+        if (text) gsap.to(text, { color: "#f5efe8", duration: 0.2 });
       };
 
       btn.addEventListener("mousemove", move);
       btn.addEventListener("mouseleave", leave);
 
+      // store cleanup on element
       btn._cleanup = () => {
         btn.removeEventListener("mousemove", move);
         btn.removeEventListener("mouseleave", leave);
       };
     });
-  });
 
-  return () => {
-    document
-      .querySelectorAll(".nav-button")
-      .forEach((btn) => btn._cleanup?.());
-
-    ctx.revert(); // 🔥 CRITICAL
-  };
-}, [location.pathname]);
-
-  /* ================= NAV ITEM ================= */
-  const NavItem = ({ to, children, end }) => (
-    <div className="nav-wrap">
-      <NavLink
-        to={to}
-        end={end}
-        className={({ isActive }) =>
-          `nav-button ${isActive ? "active" : ""}`
-        }
-      >
-        <span className="nav-text">{children}</span>
-        <span className="hover-orb" />
-      </NavLink>
-    </div>
-  );
+    return () => {
+      buttons.forEach((btn) => btn._cleanup?.());
+    };
+  }, [user]);
 
   return (
     <header className="top-bar">
@@ -139,23 +75,56 @@ const Navbar = () => {
         Rabuste
       </NavLink>
 
-      <nav className="chip-nav">
-        <NavItem to="/" end>Home</NavItem>
-        <NavItem to="/why-robusta">Why Robusta</NavItem>
-        <NavItem to="/menu">Menu</NavItem>
-        <NavItem to="/art">Art</NavItem>
-        <NavItem to="/workshops">Workshops</NavItem>
-        <NavItem to="/franchise">Franchise</NavItem>
+      <nav className="chip-nav" ref={navRootRef}>
+        <NavLink to="/" end className="nav-button">
+          <span className="nav-text">Home</span>
+          <span className="hover-orb" />
+        </NavLink>
+
+        <NavLink to="/why-robusta" className="nav-button">
+          <span className="nav-text">Why Robusta</span>
+          <span className="hover-orb" />
+        </NavLink>
+
+        <NavLink to="/menu" className="nav-button">
+          <span className="nav-text">Menu</span>
+          <span className="hover-orb" />
+        </NavLink>
+
+        <NavLink to="/art" className="nav-button">
+          <span className="nav-text">Art</span>
+          <span className="hover-orb" />
+        </NavLink>
+
+        <NavLink to="/workshops" className="nav-button">
+          <span className="nav-text">Workshops</span>
+          <span className="hover-orb" />
+        </NavLink>
+
+        <NavLink to="/franchise" className="nav-button">
+          <span className="nav-text">Franchise</span>
+          <span className="hover-orb" />
+        </NavLink>
 
         {!user && (
           <>
-            <NavItem to="/login">Login</NavItem>
-            <NavItem to="/signup">Signup</NavItem>
+            <NavLink to="/login" className="nav-button">
+              <span className="nav-text">Login</span>
+              <span className="hover-orb" />
+            </NavLink>
+
+            <NavLink to="/signup" className="nav-button">
+              <span className="nav-text">Signup</span>
+              <span className="hover-orb" />
+            </NavLink>
           </>
         )}
 
         {user?.role === "admin" && (
-          <NavItem to="/admin">Admin</NavItem>
+          <NavLink to="/admin" className="nav-button">
+            <span className="nav-text">Admin</span>
+            <span className="hover-orb" />
+          </NavLink>
         )}
 
         {user && (
