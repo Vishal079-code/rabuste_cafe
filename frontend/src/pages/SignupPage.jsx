@@ -72,16 +72,19 @@ const SignupPage = () => {
       setLoading(true);
       const { data } = await signupApi(form);
 
-      /* exit animation before route change */
+      // ✅ Store token in localStorage for API interceptor
+      localStorage.setItem('rabuste_token', data.token);
+
+      // Update auth context
+      login(data.token, data.user);
+
+      // Exit animation before navigation
       gsap.to(containerRef.current, {
         opacity: 0,
         y: -20,
         duration: 0.4,
         ease: 'power3.inOut',
-        onComplete: () => {
-          login(data.token, data.user);
-          navigate('/');
-        },
+        onComplete: () => navigate('/'),
       });
     } catch (err) {
       setError(err.response?.data?.message || 'Signup failed');

@@ -1,7 +1,8 @@
 import axios from 'axios';
 
+// Base axios instance
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE || 'http://localhost:5000',
+  baseURL: import.meta.env.VITE_API_BASE || 'http://localhost:5000/api',
 });
 
 // Attach JWT token if present
@@ -18,26 +19,29 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-export const fetchCoffee = () => api.get('/api/coffee');
-export const fetchArt = () => api.get('/api/art');
-export const fetchWorkshops = () => api.get('/api/workshops');
-export const registerWorkshop = (payload) => api.post('/api/workshops/register', payload);
-export const submitFranchise = (payload) => api.post('/api/franchise/enquiry', payload);
-export const fetchInsights = () => api.get('/api/insights/popular');
-export const aiCoffee = (payload) => api.post('/api/ai/coffee', payload);
-export const aiArt = (payload) => api.post('/api/ai/art', payload);
-export const aiWorkshop = (payload) => api.post('/api/ai/workshop', payload);
-export const fetchMenuImages = () => api.get('/api/images');
+/* ================== AUTH ================== */
+export const login = (payload) => api.post('/auth/login', payload);
+export const signup = (payload) => api.post('/auth/signup', payload);
 
-// Auth
-export const signup = (payload) => api.post('/api/auth/signup', payload);
-export const login = (payload) => api.post('/api/auth/login', payload);
+/* ================== USER API ================== */
+export const fetchCoffee = () => api.get('/coffee');
+export const fetchArt = () => api.get('/art');
+export const fetchWorkshops = () => api.get('/workshops');
+export const registerWorkshop = (payload) => api.post('/workshops/register', payload);
+export const submitFranchise = (payload) => api.post('/franchise/enquiry', payload);
+export const fetchInsights = () => api.get('/insights/popular');
 
-// Admin actions
-export const adminCreateMenu = (payload) => api.post('/api/admin/menu', payload);
-export const adminCreateWorkshop = (payload) => api.post('/api/admin/workshops', payload);
-export const adminCreateArt = (payload) => api.post('/api/admin/art', payload);
+/* ================== AI ================== */
+export const aiCoffee = (payload) => api.post('/ai/coffee', payload);
+export const aiArt = (payload) => api.post('/ai/art', payload);
+export const aiWorkshop = (payload) => api.post('/ai/workshop', payload);
+
+/* ================== MENU/IMAGES ================== */
+export const fetchMenuImages = () => api.get('/images');
+
+/* ================== ADMIN ================== */
+export const adminCreateMenu = (payload) => api.post('/admin/menu', payload);
+export const adminCreateWorkshop = (payload) => api.post('/admin/workshops', payload);
+export const adminCreateArt = (payload) => api.post('/admin/art', payload);
 
 export default api;
-
-

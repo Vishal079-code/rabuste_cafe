@@ -27,16 +27,13 @@ const LoginPage = () => {
         ease: 'power3.out',
       });
 
-      gsap.from(
-        formRef.current.children,
-        {
-          opacity: 0,
-          y: 20,
-          duration: 0.6,
-          stagger: 0.12,
-          ease: 'power3.out',
-        }
-      );
+      gsap.from(formRef.current.children, {
+        opacity: 0,
+        y: 20,
+        duration: 0.6,
+        stagger: 0.12,
+        ease: 'power3.out',
+      });
     }, containerRef);
 
     return () => ctx.revert();
@@ -68,17 +65,21 @@ const LoginPage = () => {
 
     try {
       setLoading(true);
+
       const { data } = await loginApi(form);
 
-      /* smooth exit animation before navigation */
+      // ✅ Store JWT in localStorage for API interceptor
+      localStorage.setItem('rabuste_token', data.token);
+
+      // Update context
+      login(data.token, data.user);
+
+      // Smooth exit animation before navigation
       gsap.to(containerRef.current, {
         opacity: 0,
         y: -20,
         duration: 0.4,
-        onComplete: () => {
-          login(data.token, data.user);
-          navigate('/');
-        },
+        onComplete: () => navigate('/'),
       });
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
