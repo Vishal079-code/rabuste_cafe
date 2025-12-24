@@ -670,4 +670,9 @@ a:not(.cta):hover {
     transform: none;
   }
 }
+.hero > *:not(.steam-wrapper) {
+  position: relative;
+  z-index: 1;
+}
+
 
