@@ -1,10 +1,15 @@
+import { useEffect, useRef,useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { useEffect, useRef } from "react";
+
 import { useAuth } from "../context/AuthContext";
 import gsap from "gsap";
 import "../styles/navbar.css";
 
+
 const Navbar = () => {
+  const [openProfile, setOpenProfile] = useState(false);
+const profileRef = useRef(null);
+
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const navRootRef = useRef(null);
@@ -126,13 +131,30 @@ const Navbar = () => {
             <span className="hover-orb" />
           </NavLink>
         )}
+       {user && (
+  <div className="profile-wrapper" ref={profileRef}>
+    <button
+      className="nav-button profile-btn"
+      onClick={() => setOpenProfile((p) => !p)}
+    >
+      <span className="profile-icon">👤</span>
+      <span className="hover-orb" />
+    </button>
 
-        {user && (
-          <button className="nav-button outline" onClick={handleLogout}>
-            <span className="nav-text">Logout</span>
-            <span className="hover-orb" />
-          </button>
-        )}
+    {openProfile && (
+      <div className="profile-dropdown">
+        <button className="dropdown-item" onClick={handleLogout}>
+          <span className="logout-icon">🚪</span>
+          Logout
+        </button>
+      </div>
+    )}
+  </div>
+)}
+
+        
+        
+
       </nav>
     </header>
   );
