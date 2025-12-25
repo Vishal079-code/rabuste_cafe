@@ -1,0 +1,82 @@
+.menu-viewer {
+  display: flex;
+  height: 100vh;
+  background: #f7f3ee;
+  font-family: "Playfair Display", serif;
+}
+
+/* SIDEBAR */
+.menu-sidebar {
+  width: 260px;
+  padding: 20px;
+  background: #1e1b18;
+  color: #fff;
+  overflow-y: auto;
+}
+
+.menu-sidebar h3 {
+  cursor: pointer;
+  margin: 16px 0 6px;
+}
+
+.menu-sidebar p {
+  margin-left: 12px;
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+.menu-sidebar p:hover {
+  opacity: 1;
+}
+
+/* BOOK */
+.menu-book {
+  flex: 1;
+  perspective: 1400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-page {
+  width: 70%;
+  height: 80%;
+  background: #fff;
+  padding: 40px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.2);
+  transform-style: preserve-3d;
+  transform-origin: left center;
+}
+
+.menu-item {
+  margin-bottom: 24px;
+  transition: transform 0.2s ease;
+}
+
+.menu-item:hover {
+  transform: translateY(-3px);
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.desc {
+  font-size: 14px;
+  opacity: 0.75;
+}
+
+.discount {
+  color: darkred;
+  font-weight: bold;
+}
+
+.out {
+  opacity: 0.5;
+}
+
+.out-stock {
+  color: #999;
+  font-style: italic;
+}

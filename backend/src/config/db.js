@@ -1,23 +1,38 @@
 const mongoose = require('mongoose');
 
+let mainConnection; // galleryDB
+let menuConnection; // rabusteCafe
+
+// Connect gallery DB
 const connectDB = async () => {
-  const uri = process.env.MONGO_URI;
-  if (!uri) {
-    console.error('❌ Missing MONGO_URI in environment');
-    return; // do not exit yet
-  }
-
-  try {
-    await mongoose.connect(uri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-
-    console.log('✅ MongoDB connected to DB:', mongoose.connection.db.databaseName);
-  } catch (err) {
-    console.error('❌ MongoDB connection error:', err);
-    process.exit(1); // exit if connection fails
-  }
+  mainConnection = await mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+  console.log('✅ MongoDB connected to galleryDB:', mainConnection.connection.db.databaseName);
 };
 
-module.exports = { connectDB };
+// Connect menu DB
+const connectMenuDB = async () => {
+  menuConnection = await mongoose.createConnection(process.env.MONGO_URI_MENU, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+
+  menuConnection.once('open', () => {
+    console.log('✅ MongoDB connected to rabusteCafe DB:', menuConnection.name);
+  });
+
+  menuConnection.on('error', (err) => {
+    console.error('❌ Menu DB connection error:', err);
+  });
+};
+
+const getMenuDB = () => {
+  if (!menuConnection) {
+    throw new Error('❌ Menu DB not initialized. Call connectMenuDB first.');
+  }
+  return menuConnection;
+};
+
+module.exports = { connectDB, connectMenuDB, getMenuDB };
