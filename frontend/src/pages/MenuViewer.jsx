@@ -83,18 +83,36 @@ export default function MenuViewer() {
   }, []);
 
   useLayoutEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(".menu-section-group", {
-        y: 30,
-        opacity: 0,
-        stagger: 0.08,
-        duration: 0.8,
-        ease: "power3.out",
-        delay: 0.4
-      });
-    }, contentScope);
-    return () => ctx.revert();
-  }, [index, data]);
+  const ctx = gsap.context(() => {
+
+    /* ===== SECTION STAGGER ===== */
+    gsap.from(".menu-section-group", {
+      y: 30,
+      opacity: 0,
+      duration: 0.7,
+      ease: "power3.out",
+      stagger: {
+        each: 0.12,
+        from: "start"
+      }
+    });
+
+    /* ===== ITEM STAGGER (INSIDE SECTIONS) ===== */
+    gsap.from(".menu-entry", {
+      y: 18,
+      opacity: 0,
+      duration: 0.45,
+      ease: "power2.out",
+      stagger: {
+        each: 0.05
+      },
+      delay: 0.25   // waits until section starts appearing
+    });
+
+  }, contentScope);
+
+  return () => ctx.revert();
+}, [index, data]);
 
   const handlePageTurn = (direction) => {
     if (isAnimating) return;
