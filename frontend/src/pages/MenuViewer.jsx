@@ -1,102 +1,108 @@
 import { useEffect, useState } from "react";
 import "../styles/global.css";
 
+const MENU_TABS = [
+  "Robusta Speciality Coffee",
+  "Blend Coffee",
+  "Manual Brew",
+  "Non Coffee Drinks",
+  "Savoury"
+];
+
+const CATEGORY_KEY_MAP = {
+  "Robusta Speciality Coffee": "robusta",
+  "Blend Coffee": "blend",
+  "Manual Brew": "manual",
+  "Non Coffee Drinks": "noncoffee",
+  "Savoury": "food"
+};
+
 export default function MenuViewer() {
-  const [menuData, setMenuData] = useState([]);
+  const [data, setData] = useState({ categories: [], subCategories: [], items: [] });
+  const [activeTab, setActiveTab] = useState("Robusta Speciality Coffee");
 
   useEffect(() => {
-    const fetchMenu = async () => {
-      try {
-        const res = await fetch("http://localhost:5000/debug/menu-full");
-        const data = await res.json();
-
-        // Group items by category -> subcategory -> section
-        const grouped = data.categories.map((cat) => {
-          const subs = data.subCategories
-            .filter((sub) => sub.categoryId === cat._id)
-            .map((sub) => {
-              const items = data.items
-                .filter((item) => item.subCategoryId === sub._id)
-                // group by item.section (COLD, HOT, etc)
-                .reduce((acc, item) => {
-                  const section = item.section || "GENERAL";
-                  if (!acc[section]) acc[section] = [];
-                  acc[section].push(item);
-                  return acc;
-                }, {});
-
-              return { ...sub, sections: items };
-            });
-
-          return { ...cat, subCategories: subs };
-        });
-
-        setMenuData(grouped);
-      } catch (err) {
-        console.error("Failed to load menu:", err);
-      }
-    };
-
-    fetchMenu();
+    fetch("http://localhost:5000/debug/menu-full")
+      .then((r) => r.json())
+      .then(setData)
+      .catch(console.error);
   }, []);
 
-  return (
-    <div className="page menu-viewer" style={{ padding: "40px 20px" }}>
-      {menuData.map((cat) => (
-        <section key={cat._id} className="category-section">
-          <h2 className="section-title">{cat.name.toUpperCase()}</h2>
+  const categoryKey = CATEGORY_KEY_MAP[activeTab];
 
-          {cat.subCategories.map((sub) => (
-            <div key={sub._id} className="subcategory-section" style={{ marginBottom: "32px" }}>
+  return (
+    <div className="page menu-viewer" style={{ padding: 32 }}>
+      {/* TABS */}
+      <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 24 }}>
+        {MENU_TABS.map((t) => (
+          <button
+            key={t}
+            onClick={() => setActiveTab(t)}
+            style={{
+              padding: "8px 14px",
+              borderRadius: 6,
+              border: "1px solid var(--accent-soft)",
+              background: activeTab === t ? "var(--accent-soft)" : "transparent",
+              color: activeTab === t ? "#fff" : "var(--accent-soft)"
+            }}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+
+      <h2 className="section-title">{activeTab.toUpperCase()}</h2>
+
+      {/* SUBCATEGORIES */}
+      {data.subCategories
+        .filter((sub) => sub.category?.includes(categoryKey))
+        .map((sub) => {
+          const subKey =
+            "sub_" +
+            categoryKey +
+            "_" +
+            sub.name.toLowerCase().replace(" ", "");
+
+          const subItems = data.items.filter((i) =>
+            i.subCategoryId?.includes(subKey)
+          );
+
+          if (!subItems.length) return null;
+
+          const sections = subItems.reduce((acc, item) => {
+            const sec = item.section || "GENERAL";
+            acc[sec] = acc[sec] || [];
+            acc[sec].push(item);
+            return acc;
+          }, {});
+
+          return (
+            <div key={subKey} style={{ marginTop: 32 }}>
               <h3 className="section-kicker">{sub.name.toUpperCase()}</h3>
 
-              {Object.keys(sub.sections).map((sectionName) => (
-                <div key={sectionName} className="section-items" style={{ marginBottom: "16px" }}>
-                  <h4 style={{ color: "var(--accent-soft)", marginBottom: "8px" }}>{sectionName.toUpperCase()}</h4>
+              {Object.entries(sections).map(([section, items]) => (
+                <div key={section} style={{ marginLeft: 12 }}>
+                  <h4 style={{ color: "var(--accent-soft)" }}>{section}</h4>
 
-                  {sub.sections[sectionName].map((item) => (
+                  {items.map((item, idx) => (
                     <div
-                      key={item._id}
-                      className={`menu-item ${!item.inStock ? "sold" : "availability"}`}
+                      key={`${subKey}-${idx}`}
                       style={{
-                        padding: "6px 12px",
-                        borderBottom: "1px solid rgba(216,107,50,0.2)",
-                        marginBottom: "6px",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        padding: "6px 0",
+                        borderBottom: "1px solid rgba(216,107,50,0.2)"
                       }}
                     >
-                      <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 500 }}>
-                        <span>{item.name}</span>
-                        <span>₹{item.prices?.[0]?.price || "—"}</span>
-                      </div>
-
-                      {item.description && (
-                        <div
-                          className="desc"
-                          style={{ fontSize: "0.85rem", color: "var(--muted)", marginTop: "2px" }}
-                        >
-                          {item.description}
-                        </div>
-                      )}
-
-                      {item.isDiscount > 0 && (
-                        <div style={{ color: "var(--accent-soft)", fontSize: "0.8rem", marginTop: "2px" }}>
-                          {item.isDiscount}% OFF
-                        </div>
-                      )}
-
-                      {!item.inStock && (
-                        <div style={{ color: "#ff7a7a", fontSize: "0.8rem", marginTop: "2px" }}>
-                          Out of stock
-                        </div>
-                      )}
+                      <span>{item.name}</span>
+                      <span>₹{item.prices?.[0]?.price ?? "—"}</span>
                     </div>
                   ))}
                 </div>
               ))}
             </div>
-          ))}
-        </section>
-      ))}
+          );
+        })}
     </div>
   );
 }
