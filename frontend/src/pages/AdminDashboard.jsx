@@ -3,9 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { useAuth } from '../context/AuthContext';
 import {
-  adminCreateArt,
+  adminGetMenu,
   adminCreateMenu,
+  adminUpdateMenu,
+  adminDeleteMenu,
+  adminGetWorkshops,
   adminCreateWorkshop,
+  adminUpdateWorkshop,
+  adminDeleteWorkshop,
+  adminGetArt,
+  adminCreateArt,
+  adminUpdateArt,
+  adminDeleteArt,
 } from '../services/api';
 
 import '../styles/AdminDashboard.css';
@@ -18,6 +27,21 @@ const AdminDashboard = () => {
   const sidebarRef = useRef(null);
   const tl = useRef(null);
 
+  /* ===== LISTS ===== */
+  const [menuItems, setMenuItems] = useState([]);
+  const [workshopItems, setWorkshopItems] = useState([]);
+  const [artItems, setArtItems] = useState([]);
+  const [loadingItems, setLoadingItems] = useState(false);
+  const [error, setError] = useState('');
+
+  /* ===== EDIT MODE ===== */
+  const [editingMenuId, setEditingMenuId] = useState(null);
+  const [editingWorkshopId, setEditingWorkshopId] = useState(null);
+  const [editingArtId, setEditingArtId] = useState(null);
+
+  /* ===== DELETE CONFIRMATION ===== */
+  const [deleteConfirm, setDeleteConfirm] = useState({ show: false, type: '', id: '', name: '' });
+
   /* ===== FORMS ===== */
   const [menuForm, setMenuForm] = useState({ category: '', url: '', public_id: '' });
   const [workshopForm, setWorkshopForm] = useState({
@@ -29,6 +53,7 @@ const AdminDashboard = () => {
   const [artForm, setArtForm] = useState({
     title: '',
     artistName: '',
+    description: '',
     price: '',
     imageUrl: '',
   });
@@ -36,6 +61,52 @@ const AdminDashboard = () => {
   useEffect(() => {
     if (!loading && !user) navigate('/login');
   }, [loading, user, navigate]);
+
+  /* ===== FETCH ITEMS ===== */
+  const fetchMenuItems = async () => {
+    setLoadingItems(true);
+    setError('');
+    try {
+      const res = await adminGetMenu();
+      setMenuItems(res.data);
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Failed to load menu items');
+    } finally {
+      setLoadingItems(false);
+    }
+  };
+
+  const fetchWorkshopItems = async () => {
+    setLoadingItems(true);
+    setError('');
+    try {
+      const res = await adminGetWorkshops();
+      setWorkshopItems(res.data);
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Failed to load workshops');
+    } finally {
+      setLoadingItems(false);
+    }
+  };
+
+  const fetchArtItems = async () => {
+    setLoadingItems(true);
+    setError('');
+    try {
+      const res = await adminGetArt();
+      setArtItems(res.data);
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Failed to load art items');
+    } finally {
+      setLoadingItems(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeSection === 'menu') fetchMenuItems();
+    if (activeSection === 'workshop') fetchWorkshopItems();
+    if (activeSection === 'art') fetchArtItems();
+  }, [activeSection]);
 
   /* ===== GSAP SIDEBAR ===== */
   
@@ -58,6 +129,119 @@ const AdminDashboard = () => {
       }
     );
   }, []);
+
+  /* ===== HANDLERS ===== */
+  const handleMenuSubmit = async () => {
+    setError('');
+    try {
+      if (editingMenuId) {
+        await adminUpdateMenu(editingMenuId, menuForm);
+        setEditingMenuId(null);
+      } else {
+        await adminCreateMenu(menuForm);
+      }
+      setMenuForm({ category: '', url: '', public_id: '' });
+      fetchMenuItems();
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Failed to save menu item');
+    }
+  };
+
+  const handleWorkshopSubmit = async () => {
+    setError('');
+    try {
+      const payload = {
+        ...workshopForm,
+        totalSeats: parseInt(workshopForm.totalSeats) || 0,
+        date: workshopForm.date ? new Date(workshopForm.date).toISOString() : new Date().toISOString(),
+      };
+      if (editingWorkshopId) {
+        await adminUpdateWorkshop(editingWorkshopId, payload);
+        setEditingWorkshopId(null);
+      } else {
+        await adminCreateWorkshop(payload);
+      }
+      setWorkshopForm({ title: '', description: '', date: '', totalSeats: '' });
+      fetchWorkshopItems();
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Failed to save workshop');
+    }
+  };
+
+  const handleArtSubmit = async () => {
+    setError('');
+    try {
+      const payload = {
+        ...artForm,
+        price: parseFloat(artForm.price) || 0,
+      };
+      if (editingArtId) {
+        await adminUpdateArt(editingArtId, payload);
+        setEditingArtId(null);
+      } else {
+        await adminCreateArt(payload);
+      }
+      setArtForm({ title: '', artistName: '', description: '', price: '', imageUrl: '' });
+      fetchArtItems();
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Failed to save art item');
+    }
+  };
+
+  const handleEditMenu = (item) => {
+    setEditingMenuId(item._id);
+    setMenuForm({ category: item.category, url: item.url, public_id: item.public_id });
+  };
+
+  const handleEditWorkshop = (item) => {
+    setEditingWorkshopId(item._id);
+    const dateStr = item.date ? new Date(item.date).toISOString().split('T')[0] : '';
+    setWorkshopForm({
+      title: item.title || '',
+      description: item.description || '',
+      date: dateStr,
+      totalSeats: item.totalSeats?.toString() || '',
+    });
+  };
+
+  const handleEditArt = (item) => {
+    setEditingArtId(item._id);
+    setArtForm({
+      title: item.title || '',
+      artistName: item.artistName || '',
+      description: item.description || '',
+      price: item.price?.toString() || '',
+      imageUrl: item.imageUrl || '',
+    });
+  };
+
+  const handleDelete = async () => {
+    setError('');
+    try {
+      if (deleteConfirm.type === 'menu') {
+        await adminDeleteMenu(deleteConfirm.id);
+        fetchMenuItems();
+      } else if (deleteConfirm.type === 'workshop') {
+        await adminDeleteWorkshop(deleteConfirm.id);
+        fetchWorkshopItems();
+      } else if (deleteConfirm.type === 'art') {
+        await adminDeleteArt(deleteConfirm.id);
+        fetchArtItems();
+      }
+      setDeleteConfirm({ show: false, type: '', id: '', name: '' });
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Failed to delete item');
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditingMenuId(null);
+    setEditingWorkshopId(null);
+    setEditingArtId(null);
+    setMenuForm({ category: '', url: '', public_id: '' });
+    setWorkshopForm({ title: '', description: '', date: '', totalSeats: '' });
+    setArtForm({ title: '', artistName: '', description: '', price: '', imageUrl: '' });
+  };
 
 
   if (loading || !user || user.role !== 'admin') return null;
@@ -98,35 +282,244 @@ const AdminDashboard = () => {
 
       {/* CONTENT */}
       <main className="admin-content">
+        {error && <div className="admin-error">{error}</div>}
+
         {activeSection === 'menu' && (
-          <div className="admin-card">
-            <h3>Add Menu</h3>
-            <input placeholder="Category" onChange={e => setMenuForm({ ...menuForm, category: e.target.value })} />
-            <input placeholder="Image URL" onChange={e => setMenuForm({ ...menuForm, url: e.target.value })} />
-            <input placeholder="Public ID" onChange={e => setMenuForm({ ...menuForm, public_id: e.target.value })} />
-            <button onClick={() => adminCreateMenu(menuForm)}>Save Menu</button>
-          </div>
+          <>
+            <div className="admin-card">
+              <h3>{editingMenuId ? 'Edit Menu' : 'Add Menu'}</h3>
+              <input 
+                placeholder="Category" 
+                value={menuForm.category}
+                onChange={e => setMenuForm({ ...menuForm, category: e.target.value })} 
+              />
+              <input 
+                placeholder="Image URL" 
+                value={menuForm.url}
+                onChange={e => setMenuForm({ ...menuForm, url: e.target.value })} 
+              />
+              <input 
+                placeholder="Public ID" 
+                value={menuForm.public_id}
+                onChange={e => setMenuForm({ ...menuForm, public_id: e.target.value })} 
+              />
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button onClick={handleMenuSubmit}>
+                  {editingMenuId ? 'Update Menu' : 'Save Menu'}
+                </button>
+                {editingMenuId && (
+                  <button onClick={cancelEdit} style={{ background: '#666' }}>Cancel</button>
+                )}
+              </div>
+            </div>
+
+            <div className="admin-card">
+              <h3>Menu Items ({menuItems.length})</h3>
+              {loadingItems ? (
+                <p>Loading...</p>
+              ) : menuItems.length === 0 ? (
+                <p>No menu items yet</p>
+              ) : (
+                <div className="admin-list">
+                  {menuItems.map((item) => (
+                    <div key={item._id} className="admin-list-item">
+                      <div>
+                        <strong>{item.category}</strong>
+                        <span style={{ marginLeft: '10px', fontSize: '12px', color: '#999' }}>
+                          {item.url?.substring(0, 50)}...
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button 
+                          onClick={() => handleEditMenu(item)}
+                          style={{ padding: '6px 12px', fontSize: '12px' }}
+                        >
+                          Edit
+                        </button>
+                        <button 
+                          onClick={() => setDeleteConfirm({ show: true, type: 'menu', id: item._id, name: item.category })}
+                          style={{ padding: '6px 12px', fontSize: '12px', background: '#d32f2f' }}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
         )}
 
         {activeSection === 'workshop' && (
-          <div className="admin-card">
-            <h3>Add Workshop</h3>
-            <input placeholder="Title" onChange={e => setWorkshopForm({ ...workshopForm, title: e.target.value })} />
-            <textarea placeholder="Description" onChange={e => setWorkshopForm({ ...workshopForm, description: e.target.value })} />
-            <button onClick={() => adminCreateWorkshop(workshopForm)}>Save Workshop</button>
-          </div>
+          <>
+            <div className="admin-card">
+              <h3>{editingWorkshopId ? 'Edit Workshop' : 'Add Workshop'}</h3>
+              <input 
+                placeholder="Title" 
+                value={workshopForm.title}
+                onChange={e => setWorkshopForm({ ...workshopForm, title: e.target.value })} 
+              />
+              <textarea 
+                placeholder="Description" 
+                value={workshopForm.description}
+                onChange={e => setWorkshopForm({ ...workshopForm, description: e.target.value })} 
+              />
+              <input 
+                type="date"
+                placeholder="Date" 
+                value={workshopForm.date}
+                onChange={e => setWorkshopForm({ ...workshopForm, date: e.target.value })} 
+              />
+              <input 
+                type="number"
+                placeholder="Total Seats" 
+                value={workshopForm.totalSeats}
+                onChange={e => setWorkshopForm({ ...workshopForm, totalSeats: e.target.value })} 
+              />
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button onClick={handleWorkshopSubmit}>
+                  {editingWorkshopId ? 'Update Workshop' : 'Save Workshop'}
+                </button>
+                {editingWorkshopId && (
+                  <button onClick={cancelEdit} style={{ background: '#666' }}>Cancel</button>
+                )}
+              </div>
+            </div>
+
+            <div className="admin-card">
+              <h3>Workshops ({workshopItems.length})</h3>
+              {loadingItems ? (
+                <p>Loading...</p>
+              ) : workshopItems.length === 0 ? (
+                <p>No workshops yet</p>
+              ) : (
+                <div className="admin-list">
+                  {workshopItems.map((item) => (
+                    <div key={item._id} className="admin-list-item">
+                      <div>
+                        <strong>{item.title}</strong>
+                        <span style={{ marginLeft: '10px', fontSize: '12px', color: '#999' }}>
+                          {new Date(item.date).toLocaleDateString()} • {item.totalSeats} seats
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button 
+                          onClick={() => handleEditWorkshop(item)}
+                          style={{ padding: '6px 12px', fontSize: '12px' }}
+                        >
+                          Edit
+                        </button>
+                        <button 
+                          onClick={() => setDeleteConfirm({ show: true, type: 'workshop', id: item._id, name: item.title })}
+                          style={{ padding: '6px 12px', fontSize: '12px', background: '#d32f2f' }}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
         )}
 
         {activeSection === 'art' && (
-          <div className="admin-card">
-            <h3>Add Art</h3>
-            <input placeholder="Title" onChange={e => setArtForm({ ...artForm, title: e.target.value })} />
-            <input placeholder="Artist" onChange={e => setArtForm({ ...artForm, artistName: e.target.value })} />
-            <input placeholder="Price" onChange={e => setArtForm({ ...artForm, price: e.target.value })} />
-            <button onClick={() => adminCreateArt(artForm)}>Save Art</button>
-          </div>
+          <>
+            <div className="admin-card">
+              <h3>{editingArtId ? 'Edit Art' : 'Add Art'}</h3>
+              <input 
+                placeholder="Title" 
+                value={artForm.title}
+                onChange={e => setArtForm({ ...artForm, title: e.target.value })} 
+              />
+              <input 
+                placeholder="Artist" 
+                value={artForm.artistName}
+                onChange={e => setArtForm({ ...artForm, artistName: e.target.value })} 
+              />
+              <textarea 
+                placeholder="Description" 
+                value={artForm.description}
+                onChange={e => setArtForm({ ...artForm, description: e.target.value })} 
+              />
+              <input 
+                type="number"
+                placeholder="Price" 
+                value={artForm.price}
+                onChange={e => setArtForm({ ...artForm, price: e.target.value })} 
+              />
+              <input 
+                placeholder="Image URL" 
+                value={artForm.imageUrl}
+                onChange={e => setArtForm({ ...artForm, imageUrl: e.target.value })} 
+              />
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button onClick={handleArtSubmit}>
+                  {editingArtId ? 'Update Art' : 'Save Art'}
+                </button>
+                {editingArtId && (
+                  <button onClick={cancelEdit} style={{ background: '#666' }}>Cancel</button>
+                )}
+              </div>
+            </div>
+
+            <div className="admin-card">
+              <h3>Art Items ({artItems.length})</h3>
+              {loadingItems ? (
+                <p>Loading...</p>
+              ) : artItems.length === 0 ? (
+                <p>No art items yet</p>
+              ) : (
+                <div className="admin-list">
+                  {artItems.map((item) => (
+                    <div key={item._id} className="admin-list-item">
+                      <div>
+                        <strong>{item.title}</strong>
+                        <span style={{ marginLeft: '10px', fontSize: '12px', color: '#999' }}>
+                          by {item.artistName} • ${item.price}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button 
+                          onClick={() => handleEditArt(item)}
+                          style={{ padding: '6px 12px', fontSize: '12px' }}
+                        >
+                          Edit
+                        </button>
+                        <button 
+                          onClick={() => setDeleteConfirm({ show: true, type: 'art', id: item._id, name: item.title })}
+                          style={{ padding: '6px 12px', fontSize: '12px', background: '#d32f2f' }}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
         )}
       </main>
+
+      {/* DELETE CONFIRMATION MODAL */}
+      {deleteConfirm.show && (
+        <div className="admin-modal-overlay" onClick={() => setDeleteConfirm({ show: false, type: '', id: '', name: '' })}>
+          <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Confirm Delete</h3>
+            <p>Are you sure you want to delete "{deleteConfirm.name}"?</p>
+            <p style={{ fontSize: '12px', color: '#999' }}>This action cannot be undone.</p>
+            <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+              <button onClick={handleDelete} style={{ background: '#d32f2f' }}>Delete</button>
+              <button onClick={() => setDeleteConfirm({ show: false, type: '', id: '', name: '' })} style={{ background: '#666' }}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };

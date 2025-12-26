@@ -40,8 +40,19 @@ export const aiWorkshop = (payload) => api.post('/ai/workshop', payload);
 export const fetchMenuImages = () => api.get('/images');
 
 /* ================== ADMIN ================== */
+export const adminGetMenu = () => api.get('/admin/menu');
 export const adminCreateMenu = (payload) => api.post('/admin/menu', payload);
+export const adminUpdateMenu = (id, payload) => api.put(`/admin/menu/${id}`, payload);
+export const adminDeleteMenu = (id) => api.delete(`/admin/menu/${id}`);
+
+export const adminGetWorkshops = () => api.get('/admin/workshops');
 export const adminCreateWorkshop = (payload) => api.post('/admin/workshops', payload);
+export const adminUpdateWorkshop = (id, payload) => api.put(`/admin/workshops/${id}`, payload);
+export const adminDeleteWorkshop = (id) => api.delete(`/admin/workshops/${id}`);
+
+export const adminGetArt = () => api.get('/admin/art');
 export const adminCreateArt = (payload) => api.post('/admin/art', payload);
+export const adminUpdateArt = (id, payload) => api.put(`/admin/art/${id}`, payload);
+export const adminDeleteArt = (id) => api.delete(`/admin/art/${id}`);
 
 export default api;

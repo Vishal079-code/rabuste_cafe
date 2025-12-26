@@ -9,6 +9,39 @@ const router = express.Router();
 // All admin routes require authenticated admin
 router.use(authMiddleware, adminMiddleware);
 
+// GET /api/admin/menu - get all menu images
+router.get('/menu', async (req, res) => {
+  try {
+    const images = await MenuImage.find().sort({ category: 1, createdAt: 1 });
+    res.json(images);
+  } catch (err) {
+    console.error('Admin get menu images error:', err);
+    res.status(500).json({ message: 'Failed to fetch menu images' });
+  }
+});
+
+// GET /api/admin/workshops - get all workshops
+router.get('/workshops', async (req, res) => {
+  try {
+    const workshops = await Workshop.find().sort({ date: 1 });
+    res.json(workshops);
+  } catch (err) {
+    console.error('Admin get workshops error:', err);
+    res.status(500).json({ message: 'Failed to fetch workshops' });
+  }
+});
+
+// GET /api/admin/art - get all art listings
+router.get('/art', async (req, res) => {
+  try {
+    const art = await Art.find().sort({ createdAt: -1 });
+    res.json(art);
+  } catch (err) {
+    console.error('Admin get art error:', err);
+    res.status(500).json({ message: 'Failed to fetch art listings' });
+  }
+});
+
 // POST /api/admin/menu - add menu image
 router.post('/menu', async (req, res) => {
   try {
@@ -70,6 +103,162 @@ router.post('/art', async (req, res) => {
   } catch (err) {
     console.error('Admin create art error:', err);
     res.status(500).json({ message: 'Failed to create art listing' });
+  }
+});
+
+// PUT /api/admin/menu/:id - update menu image
+router.put('/menu/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { category, url, public_id } = req.body || {};
+    
+    if (!id) {
+      return res.status(400).json({ message: 'Menu ID is required' });
+    }
+    
+    const updated = await MenuImage.findByIdAndUpdate(
+      id,
+      { category, url, public_id },
+      { new: true, runValidators: true }
+    );
+    
+    if (!updated) {
+      return res.status(404).json({ message: 'Menu image not found' });
+    }
+    
+    res.json(updated);
+  } catch (err) {
+    console.error('Admin update menu image error:', err);
+    res.status(500).json({ message: 'Failed to update menu image' });
+  }
+});
+
+// DELETE /api/admin/menu/:id - delete menu image
+router.delete('/menu/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (!id) {
+      return res.status(400).json({ message: 'Menu ID is required' });
+    }
+    
+    const deleted = await MenuImage.findByIdAndDelete(id);
+    
+    if (!deleted) {
+      return res.status(404).json({ message: 'Menu image not found' });
+    }
+    
+    res.json({ message: 'Menu image deleted successfully' });
+  } catch (err) {
+    console.error('Admin delete menu image error:', err);
+    res.status(500).json({ message: 'Failed to delete menu image' });
+  }
+});
+
+// PUT /api/admin/workshops/:id - update workshop
+router.put('/workshops/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, description, date, totalSeats, tags } = req.body || {};
+    
+    if (!id) {
+      return res.status(400).json({ message: 'Workshop ID is required' });
+    }
+    
+    const updated = await Workshop.findByIdAndUpdate(
+      id,
+      { title, description, date, totalSeats, tags: tags || [] },
+      { new: true, runValidators: true }
+    );
+    
+    if (!updated) {
+      return res.status(404).json({ message: 'Workshop not found' });
+    }
+    
+    res.json(updated);
+  } catch (err) {
+    console.error('Admin update workshop error:', err);
+    res.status(500).json({ message: 'Failed to update workshop' });
+  }
+});
+
+// DELETE /api/admin/workshops/:id - delete workshop
+router.delete('/workshops/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (!id) {
+      return res.status(400).json({ message: 'Workshop ID is required' });
+    }
+    
+    const deleted = await Workshop.findByIdAndDelete(id);
+    
+    if (!deleted) {
+      return res.status(404).json({ message: 'Workshop not found' });
+    }
+    
+    res.json({ message: 'Workshop deleted successfully' });
+  } catch (err) {
+    console.error('Admin delete workshop error:', err);
+    res.status(500).json({ message: 'Failed to delete workshop' });
+  }
+});
+
+// PUT /api/admin/art/:id - update art listing
+router.put('/art/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, artistName, description, price, imageUrl, availability, moodTags } =
+      req.body || {};
+    
+    if (!id) {
+      return res.status(400).json({ message: 'Art ID is required' });
+    }
+    
+    const updated = await Art.findByIdAndUpdate(
+      id,
+      {
+        title,
+        artistName,
+        description,
+        price,
+        imageUrl,
+        availability: availability || 'available',
+        moodTags: moodTags || [],
+      },
+      { new: true, runValidators: true }
+    );
+    
+    if (!updated) {
+      return res.status(404).json({ message: 'Art listing not found' });
+    }
+    
+    res.json(updated);
+  } catch (err) {
+    console.error('Admin update art error:', err);
+    res.status(500).json({ message: 'Failed to update art listing' });
+  }
+});
+
+// DELETE /api/admin/art/:id - delete art listing
+router.delete('/art/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (!id) {
+      return res.status(400).json({ message: 'Art ID is required' });
+    }
+    
+    const deleted = await Art.findByIdAndDelete(id);
+    
+    if (!deleted) {
+      return res.status(404).json({ message: 'Art listing not found' });
+    }
+    
+    res.json({ message: 'Art listing deleted successfully' });
+  } catch (err) {
+    console.error('Admin delete art error:', err);
+    res.status(500).json({ message: 'Failed to delete art listing' });
   }
 });
 
