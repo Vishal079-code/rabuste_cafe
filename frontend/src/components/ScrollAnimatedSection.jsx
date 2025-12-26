@@ -13,3 +13,4 @@ const ScrollAnimatedSection = ({ children, className = '', ...props }) => {
 export default ScrollAnimatedSection;
 
 
+
