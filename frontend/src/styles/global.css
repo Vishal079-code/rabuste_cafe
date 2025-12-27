@@ -6,7 +6,9 @@
   --text: #f5efe8;
   --muted: #c2b6a8;
   --glow: 0 10px 40px rgba(216, 107, 50, 0.25);
-  font-family: 'Space Grotesk', 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Inter', 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Playfair Display', 'Georgia', serif;
+  --font-body: 'Inter', 'Space Grotesk', system-ui, -apple-system, sans-serif;
 }
 
 /* Auth & admin minimal UI */
@@ -31,13 +33,23 @@
 
 .auth-card h2 {
   margin: 0 0 0.25rem;
-  font-size: 1.5rem;
+  font-size: 1.75rem;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  transition: color 0.3s ease;
+}
+
+.auth-card h2:hover {
+  color: var(--accent-soft);
 }
 
 .auth-subtitle {
   margin: 0 0 1.5rem;
-  font-size: 0.9rem;
+  font-size: 0.9375rem;
   color: var(--muted);
+  line-height: 1.6;
+  letter-spacing: 0.01em;
 }
 
 .auth-form {
@@ -49,9 +61,11 @@
 .auth-form label {
   display: flex;
   flex-direction: column;
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   color: var(--muted);
   gap: 0.25rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
 }
 
 .auth-form input,
@@ -151,8 +165,10 @@
 
 .admin-subtitle {
   margin: 0.25rem 0 0;
-  font-size: 0.9rem;
+  font-size: 0.9375rem;
   color: var(--muted);
+  line-height: 1.6;
+  letter-spacing: 0.01em;
 }
 
 .admin-user-info {
@@ -179,7 +195,15 @@
 
 .admin-card h3 {
   margin: 0 0 0.75rem;
-  font-size: 1rem;
+  font-size: 1.125rem;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition: color 0.3s ease;
+}
+
+.admin-card h3:hover {
+  color: var(--accent-soft);
 }
 
 .admin-form {
@@ -214,6 +238,99 @@ body {
   background: radial-gradient(circle at 20% 20%, rgba(216, 107, 50, 0.08), transparent 40%), var(--bg);
   color: var(--text);
   min-height: 100vh;
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.7;
+  letter-spacing: 0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ================= TYPOGRAPHY HIERARCHY ================= */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 0.5em;
+  transition: color 0.3s ease, letter-spacing 0.3s ease;
+}
+
+h1 {
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+h2 {
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+h3 {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+h4 {
+  font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+  font-weight: 600;
+}
+
+h5 {
+  font-size: clamp(1.1rem, 2vw, 1.25rem);
+  font-weight: 600;
+}
+
+h6 {
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+p {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.75;
+  letter-spacing: 0.01em;
+  color: var(--text);
+  margin-bottom: 1em;
+}
+
+strong, b {
+  font-weight: 600;
+  font-family: var(--font-heading);
+  letter-spacing: -0.01em;
+  color: var(--text);
+  transition: color 0.3s ease;
+}
+
+strong:hover, b:hover {
+  color: var(--accent-soft);
+}
+
+small {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+}
+
+label {
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.6;
+}
+
+/* Subtle hover effects on headings */
+h1:hover, h2:hover, h3:hover {
+  color: var(--accent-soft);
+  letter-spacing: -0.025em;
+  transition: color 0.3s ease, letter-spacing 0.3s ease;
 }
 
 .page {
@@ -257,15 +374,34 @@ section {
 }
 
 .section-title {
-  font-size: 28px;
+  font-family: var(--font-heading);
+  font-size: clamp(1.75rem, 3.5vw, 2.625rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
   margin-bottom: 12px;
+  line-height: 1.2;
+  transition: color 0.3s ease, letter-spacing 0.3s ease;
+}
+
+.section-title:hover {
+  color: var(--accent-soft);
+  letter-spacing: -0.025em;
 }
 
 .section-kicker {
   color: var(--accent-soft);
-  letter-spacing: 1px;
-  font-size: 12px;
+  letter-spacing: 0.15em;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
   margin-bottom: 6px;
+  font-family: var(--font-body);
+  transition: color 0.3s ease, letter-spacing 0.3s ease;
+}
+
+.section-kicker:hover {
+  color: var(--accent);
+  letter-spacing: 0.18em;
 }
 
 .grid {
@@ -281,6 +417,23 @@ section {
   box-shadow: var(--glow);
 }
 
+.card h3 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition: color 0.3s ease, letter-spacing 0.3s ease;
+}
+
+.card:hover h3 {
+  color: var(--accent-soft);
+  letter-spacing: -0.015em;
+}
+
+.card p {
+  line-height: 1.7;
+  letter-spacing: 0.01em;
+}
+
 .tag {
   display: inline-block;
   padding: 6px 10px;
@@ -288,8 +441,17 @@ section {
   background: rgba(216, 107, 50, 0.15);
   border: 1px solid rgba(216, 107, 50, 0.25);
   color: var(--accent-soft);
-  font-size: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
   margin-right: 6px;
+  transition: color 0.3s ease, letter-spacing 0.3s ease, background 0.3s ease;
+}
+
+.tag:hover {
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  background: rgba(216, 107, 50, 0.2);
 }
 
 .pill {
@@ -298,7 +460,15 @@ section {
   border-radius: 50px;
   background: rgba(255, 255, 255, 0.06);
   color: var(--muted);
-  font-size: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  transition: color 0.3s ease, background 0.3s ease;
+}
+
+.pill:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .cta {
@@ -374,6 +544,9 @@ section {
 
 .muted {
   color: var(--muted);
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  letter-spacing: 0.01em;
 }
 
 .toast {
@@ -414,6 +587,16 @@ section {
   border-radius: 20px;
   padding: 22px;
   box-shadow: var(--glow);
+}
+
+.blur-panel strong {
+  display: block;
+  margin-bottom: 0.5em;
+  font-size: 1.125rem;
+}
+
+.blur-panel p {
+  margin-bottom: 0.75em;
 }
 
 .hero {
@@ -553,15 +736,32 @@ section {
 }
 
 .hero h1 {
-  font-size: clamp(32px, 8vw, 56px);
-  line-height: 1.05;
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 8vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.1;
   max-width: 720px;
+  letter-spacing: -0.03em;
+  transition: color 0.3s ease, letter-spacing 0.3s ease;
+}
+
+.hero h1:hover {
+  color: var(--accent-soft);
+  letter-spacing: -0.035em;
 }
 
 .hero p {
   max-width: 560px;
   color: var(--muted);
   margin: 18px 0 24px;
+  font-size: 1.125rem;
+  line-height: 1.8;
+  letter-spacing: 0.015em;
+  transition: color 0.3s ease;
+}
+
+.hero p:hover {
+  color: var(--text);
 }
 
 .secondary-logo {
@@ -622,8 +822,9 @@ section {
 a:not(.cta) {
   color: var(--accent-soft);
   text-decoration: none;
-  transition: color 0.3s ease, text-decoration 0.3s ease;
+  transition: color 0.3s ease, text-decoration 0.3s ease, letter-spacing 0.3s ease;
   position: relative;
+  letter-spacing: 0.01em;
 }
 
 a:not(.cta):hover {
@@ -631,6 +832,7 @@ a:not(.cta):hover {
   text-decoration: underline;
   text-decoration-color: var(--accent);
   text-underline-offset: 4px;
+  letter-spacing: 0.02em;
 }
 
 @media (max-width: 480px) {

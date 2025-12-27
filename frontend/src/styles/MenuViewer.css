@@ -29,10 +29,16 @@
 
 .page-indicator {
   color: #ffffff;
-  font-size: 1.4rem;
-  letter-spacing: 4px;
-  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  letter-spacing: 0.25em;
+  font-family: var(--font-heading);
   font-weight: 700;
+  transition: color 0.3s ease, letter-spacing 0.3s ease;
+}
+
+.page-indicator:hover {
+  color: var(--accent-soft);
+  letter-spacing: 0.3em;
 }
 
 .indicator-line {
@@ -132,10 +138,18 @@
 }
 
 .estd {
-  font-size: 10px;
-  letter-spacing: 4px;
+  font-size: 0.625rem;
+  letter-spacing: 0.25em;
   color: #6b4b3a;
   opacity: 0.85;
+  font-weight: 600;
+  text-transform: uppercase;
+  transition: opacity 0.3s ease, letter-spacing 0.3s ease;
+}
+
+.estd:hover {
+  opacity: 1;
+  letter-spacing: 0.3em;
 }
 
 .ornament {
@@ -151,10 +165,10 @@
 }
 
 .section-bifurcation {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-heading);
   color: #b5531f;
   font-size: 1rem;
-  letter-spacing: 3px;
+  letter-spacing: 0.1875em;
   text-align: center;
   margin: 30px 0 20px;
   display: flex;
@@ -162,6 +176,13 @@
   justify-content: center;
   gap: 15px;
   text-transform: uppercase;
+  font-weight: 600;
+  transition: color 0.3s ease, letter-spacing 0.3s ease;
+}
+
+.section-bifurcation:hover {
+  color: #d86b32;
+  letter-spacing: 0.22em;
 }
 
 .section-bifurcation::before,
@@ -175,8 +196,14 @@
 .section-label {
   color: #5a3a2e;
   font-weight: 700;
-  letter-spacing: 1px;
+  letter-spacing: 0.0625em;
   margin-bottom: 6px;
+  font-family: var(--font-heading);
+  transition: color 0.3s ease;
+}
+
+.section-label:hover {
+  color: #b5531f;
 }
 
 /* ================= MENU ITEMS ================= */
@@ -205,9 +232,16 @@
 .entry-name {
   font-weight: 700;
   color: #1a1a1a;
-  font-family: 'Playfair Display', serif;
-  font-size: 1.15rem;
-  line-height: 1.2;
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  transition: color 0.3s ease, letter-spacing 0.3s ease;
+}
+
+.entry-name:hover {
+  color: #b5531f;
+  letter-spacing: -0.015em;
 }
 
 /* ================= TAGS ================= */
@@ -258,8 +292,15 @@
 
 .price-final {
   color: #b14e1c;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 800;
+  font-family: var(--font-heading);
+  letter-spacing: -0.01em;
+  transition: color 0.3s ease;
+}
+
+.price-final:hover {
+  color: #d86b32;
 }
 
 /* ================= DIVIDER ================= */
@@ -278,11 +319,17 @@
 
 .paper-footer {
   text-align: center;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: #6b4b3a;
   opacity: 0.6;
   margin-top: 40px;
-  letter-spacing: 2px;
+  letter-spacing: 0.125em;
+  line-height: 1.6;
+  transition: opacity 0.3s ease;
+}
+
+.paper-footer:hover {
+  opacity: 0.8;
 }
 
 /* ================= PAGE CURL ================= */
