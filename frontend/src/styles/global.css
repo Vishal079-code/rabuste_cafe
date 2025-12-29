@@ -951,4 +951,54 @@ a:not(.cta):hover {
   transform: translateY(-2px) scale(1.02);
 }
 
+/* ================= AI EXPERIENCE – SELECT FIX ================= */
 
+/* Target only AI Experience selects */
+#ai select.input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background-color: rgba(24, 18, 16, 0.95);
+  color: var(--text);
+  border: 1px solid rgba(216, 107, 50, 0.4);
+  cursor: pointer;
+}
+
+/* Dropdown arrow (subtle, non-intrusive) */
+#ai select.input {
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--accent-soft) 50%),
+    linear-gradient(135deg, var(--accent-soft) 50%, transparent 50%);
+  background-position:
+    calc(100% - 20px) 55%,
+    calc(100% - 14px) 55%;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+/* IMPORTANT: options visibility fix */
+#ai select.input option {
+  background-color: #181210; /* solid dark */
+  color: #f5efe8;            /* forced light text */
+  font-weight: 500;
+}
+
+/* Hovered option */
+#ai select.input option:hover {
+  background-color: rgba(216, 107, 50, 0.35);
+  color: #ffffff;
+}
+
+/* Selected option */
+#ai select.input option:checked {
+  background-color: rgba(216, 107, 50, 0.6);
+  color: #ffffff;
+}
+
+/* Focus state */
+#ai select.input:focus {
+  outline: none;
+  border-color: var(--accent-soft);
+  box-shadow: 0 0 0 2px rgba(216, 107, 50, 0.35);
+}
