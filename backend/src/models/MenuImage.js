@@ -9,6 +9,8 @@ const menuImageSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+menuImageSchema.index({ category: 1 });
+
 module.exports = mongoose.model('MenuImage', menuImageSchema);
 
 

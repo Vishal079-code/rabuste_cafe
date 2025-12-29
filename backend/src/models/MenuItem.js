@@ -20,6 +20,21 @@ const schema = new mongoose.Schema(
   { timestamps: true }
 );
 
+schema.index({ name: 1 });
+schema.index({ groupId: 1, isActive: 1 });
+schema.index({ 'prices.inStock': 1 });
+
+schema.virtual('hasStock').get(function () {
+  return this.prices.some(p => p.inStock);
+});
+
+schema.statics.findItemsForChatbot = function (groupIds) {
+  return this.find({
+    groupId: { $in: groupIds },
+    isActive: true
+  }).sort({ displayOrder: 1 });
+};
+
 let MenuItemModel;
 
 function getMenuItemModel() {

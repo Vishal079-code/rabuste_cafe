@@ -4,6 +4,7 @@ const express = require('express');
 const cors = require('cors');
 const { connectDB, connectMenuDB } = require('./config/db');
 
+
 // Log MONGO_URI on startup (mask password for security)
 const mongoUri = process.env.MONGO_URI;
 if (mongoUri) {
@@ -17,7 +18,22 @@ if (mongoUri) {
 const app = express();
 app.use(cors());
 app.use(express.json());
+require("dotenv").config();
 
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+  })
+);
+
+app.use(express.json());
+
+app.get("/test", (req, res) => {
+  res.send("SERVER IS RUNNING");
+});
+
+// 🔥 CHATBOT ROUTE
+app.use("/api/chat", require("./routes/Chat"));
 // ---------- ROUTES ----------
 const coffeeRoutes = require('./routes/coffeeRoutes');
 const artRoutes = require('./routes/artRoutes');

@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider } from './context/AuthContext';
+
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import AdminDashboard from './pages/AdminDashboard';
@@ -12,6 +13,8 @@ import ArtPage from './pages/ArtPage';
 import WorkshopsPage from './pages/WorkshopsPage';
 import FranchisePage from './pages/FranchisePage';
 import NotFoundPage from './pages/NotFoundPage';
+
+import CoffeeBot from './components/CoffeeBot/CoffeeBot'; // ✅ ADDED
 import './styles/navbar.css';
 
 const App = () => {
@@ -19,6 +22,10 @@ const App = () => {
     <AuthProvider>
       <ErrorBoundary>
         <Navbar />
+
+        {/* ✅ GLOBAL AI CHATBOT */}
+        <CoffeeBot />
+
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/why-robusta" element={<WhyRobustaPage />} />
@@ -37,4 +44,3 @@ const App = () => {
 };
 
 export default App;
-

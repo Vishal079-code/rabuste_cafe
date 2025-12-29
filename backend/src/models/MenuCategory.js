@@ -11,6 +11,18 @@ const schema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Indexes
+schema.index({ name: 1 });
+schema.index({ isActive: 1 });
+
+// Chatbot helper
+schema.statics.findByNameForChatbot = function (name) {
+  return this.findOne({
+    name: new RegExp(`^${name}$`, 'i'),
+    isActive: true
+  });
+};
+
 let MenuCategoryModel;
 
 function getMenuCategoryModel() {

@@ -12,6 +12,16 @@ const schema = new mongoose.Schema(
   { timestamps: true }
 );
 
+schema.index({ subCategoryId: 1 });
+schema.index({ isActive: 1 });
+
+schema.statics.findGroupsForChatbot = function (subCategoryId) {
+  return this.find({
+    subCategoryId,
+    isActive: true
+  }).sort({ displayOrder: 1 });
+};
+
 let MenuGroupModel;
 
 function getMenuGroupModel() {
