@@ -1,6 +1,9 @@
 # Ignore node_modules in any folder
 **/node_modules/
-
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
 # Ignore environment variables
 **/.env
 
