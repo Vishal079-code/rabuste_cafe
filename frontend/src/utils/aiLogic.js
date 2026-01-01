@@ -42,3 +42,4 @@ export const explainableWorkshop = ({ mood, timeOfDay }) => ({
       : 'Latte Art Experience',
   reasoning: `Best suited for a ${mood} mindset during the ${timeOfDay}.`,
 });
+

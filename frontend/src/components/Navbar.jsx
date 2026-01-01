@@ -111,6 +111,11 @@ const profileRef = useRef(null);
           <span className="hover-orb" />
         </NavLink>
 
+        <NavLink to="/ai-experience" className="nav-button">
+          <span className="nav-text">AI Experience</span>
+          <span className="hover-orb" />
+        </NavLink>
+
         {!user && (
           <>
             <NavLink to="/login" className="nav-button">

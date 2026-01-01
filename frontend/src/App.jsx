@@ -12,6 +12,7 @@ import MenuPage from './pages/MenuPage';
 import ArtPage from './pages/ArtPage';
 import WorkshopsPage from './pages/WorkshopsPage';
 import FranchisePage from './pages/FranchisePage';
+import AIExperiencePage from './pages/AIExperiencePage';
 import NotFoundPage from './pages/NotFoundPage';
 
 import CoffeeBot from './components/CoffeeBot/CoffeeBot'; // ✅ ADDED
@@ -33,6 +34,7 @@ const App = () => {
           <Route path="/art" element={<ArtPage />} />
           <Route path="/workshops" element={<WorkshopsPage />} />
           <Route path="/franchise" element={<FranchisePage />} />
+          <Route path="/ai-experience" element={<AIExperiencePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/admin" element={<AdminDashboard />} />
