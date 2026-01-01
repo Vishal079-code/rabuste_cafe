@@ -1,70 +1,71 @@
-const moodToStrength = {
-  calm: 'medium',
-  cozy: 'medium',
-  bold: 'strong',
-  creative: 'medium',
-  focused: 'strong',
-  energetic: 'strong',
-  mellow: 'light',
+// utils/aiLogic.js
+
+const moodToProfile = {
+  calm: {
+    strength: 'medium',
+    tags: ['smooth', 'balanced', 'latte'],
+  },
+  cozy: {
+    strength: 'medium',
+    tags: ['chocolate', 'caramel', 'comfort'],
+  },
+  bold: {
+    strength: 'strong',
+    tags: ['robusta', 'intense', 'espresso'],
+  },
+  focused: {
+    strength: 'strong',
+    tags: ['pure', 'manual', 'clean'],
+  },
+  energetic: {
+    strength: 'strong',
+    tags: ['iced', 'bright', 'cold'],
+  },
+  mellow: {
+    strength: 'light',
+    tags: ['milk', 'soft', 'low'],
+  },
 };
 
-const timeToProfile = {
-  morning: 'bright',
-  afternoon: 'balanced',
-  evening: 'comfort',
-  night: 'decaf',
+const timeToTags = {
+  morning: ['bright', 'clean'],
+  afternoon: ['balanced', 'smooth'],
+  evening: ['comfort', 'chocolate'],
+  night: ['milk', 'soft'],
 };
 
 const suggestCoffee = ({ mood = 'calm', timeOfDay = 'morning', prefersMilk = false }) => {
-  const strength = moodToStrength[mood] || 'medium';
-  const timeProfile = timeToProfile[timeOfDay] || 'balanced';
-  const tags = [];
-  if (prefersMilk) tags.push('creamy');
-  if (timeProfile === 'decaf') tags.push('low-caf');
-  if (strength === 'strong') tags.push('bold');
+  const moodProfile = moodToProfile[mood] || moodToProfile.calm;
+  const timeTags = timeToTags[timeOfDay] || [];
 
-  const suggestion = {
-    title: strength === 'strong' ? 'Thunderbolt Robusta' : strength === 'light' ? 'Silk Drift' : 'Amber Bloom',
-    strength,
+  const tags = [...moodProfile.tags, ...timeTags];
+
+  if (prefersMilk) tags.push('milk');
+  else tags.push('black');
+
+  return {
+    strength: moodProfile.strength,
     tags,
-    reasoning: `Mood hints ${strength} intensity; ${timeProfile} profile keeps it ${timeProfile}.`,
-  };
-  return suggestion;
-};
-
-const suggestArt = ({ mood = 'calm' }) => {
-  const palette = {
-    calm: 'deep blues with copper sheen',
-    bold: 'charcoal strokes with neon vermilion',
-    creative: 'textured mixed media with gold leaf',
-    cozy: 'sepia ink on warm fiber paper',
-  }[mood] || 'layered textures with warm undertones';
-
-  return {
-    title: `${mood.charAt(0).toUpperCase() + mood.slice(1)} Reverie`,
-    palette,
-    reasoning: `Palette mirrors ${mood} energy with Robusta-inspired warmth.`,
+    reasoning: `You’re feeling ${mood}. A ${moodProfile.strength} coffee suits this ${timeOfDay} moment best.`,
   };
 };
 
-const suggestWorkshop = ({ timeOfDay = 'afternoon', vibe = 'creative' }) => {
-  const option =
-    vibe === 'creative'
-      ? 'Latte Art x Ink'
-      : vibe === 'focused'
+const suggestArt = ({ mood = 'calm' }) => ({
+  theme:
+    mood === 'bold'
+      ? 'high contrast modern'
+      : mood === 'cozy'
+      ? 'warm textured'
+      : 'earthy minimal',
+});
+
+const suggestWorkshop = ({ vibe = 'creative', timeOfDay = 'afternoon' }) => ({
+  recommendation:
+    vibe === 'focused'
       ? 'Precision Brew Lab'
-      : 'Origin Stories & Cupping';
-  return {
-    title: option,
-    bestDuring: timeOfDay === 'morning' ? 'morning freshness' : 'golden hour',
-    reasoning: `Pairs ${vibe} mood with ${timeOfDay} attention span for better immersion.`,
-  };
-};
+      : timeOfDay === 'evening'
+      ? 'Coffee Tasting Stories'
+      : 'Latte Art Experience',
+});
 
 module.exports = { suggestCoffee, suggestArt, suggestWorkshop };
-
-
-
-
-
-

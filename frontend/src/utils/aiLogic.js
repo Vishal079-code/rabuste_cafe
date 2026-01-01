@@ -1,56 +1,44 @@
-export const moodToStrength = {
-  calm: 'medium',
-  cozy: 'medium',
-  bold: 'strong',
-  creative: 'medium',
-  focused: 'strong',
-  energetic: 'strong',
-  mellow: 'light',
-};
-
-export const timeToProfile = {
-  morning: 'bright',
-  afternoon: 'balanced',
-  evening: 'comfort',
-  night: 'decaf',
-};
+import coffeeMenu from './coffeeMenu';
 
 export const explainableCoffee = ({ mood, timeOfDay, prefersMilk }) => {
-  const strength = moodToStrength[mood] || 'medium';
-  const timeProfile = timeToProfile[timeOfDay] || 'balanced';
-  const title = strength === 'strong' ? 'Thunderbolt Robusta' : strength === 'light' ? 'Silk Drift' : 'Amber Bloom';
-  const reasoning = [
-    `Mood points to a ${strength} cup.`,
-    `Time of day favors a ${timeProfile} profile to keep you balanced.`,
-    prefersMilk ? 'Adding creamy notes for comfort.' : 'Keeping it pure for clarity.',
-  ].join(' ');
-  return { title, strength, timeProfile, reasoning };
+  const temperature =
+    timeOfDay === 'morning' || timeOfDay === 'night' ? 'hot' : 'cold';
+
+  const matches = coffeeMenu.filter((coffee) => {
+    return (
+      coffee.temperature === temperature &&
+      coffee.milk === prefersMilk &&
+      coffee.moods.includes(mood)
+    );
+  });
+
+  const fallback = coffeeMenu.filter(
+    (coffee) => coffee.milk === prefersMilk
+  );
+
+  const finalMatches = matches.length > 0 ? matches : fallback;
+
+  return {
+    title: `Perfect picks for a ${mood} ${timeOfDay}`,
+    reasoning: `We matched your mood, preferred time, and ${
+      prefersMilk ? 'milk-based' : 'non-milk'
+    } choice with our Robusta menu.`,
+    matches: finalMatches.slice(0, 5),
+  };
 };
 
-export const explainableArt = ({ mood }) => {
-  const palette = {
-    calm: 'deep blues with copper sheen',
-    bold: 'charcoal strokes with neon vermilion',
-    creative: 'textured mixed media with gold leaf',
-    cozy: 'sepia ink on warm fiber paper',
-  }[mood] || 'layered textures with warm undertones';
-  const reasoning = `Palette mirrors ${mood || 'mixed'} energy through tactile warmth.`;
-  return { title: `${mood || 'Warm'} Reverie`, palette, reasoning };
-};
 
-export const explainableWorkshop = ({ mood, timeOfDay }) => {
-  const title =
-    mood === 'creative'
-      ? 'Latte Art x Ink'
-      : mood === 'focused'
+export const explainableArt = ({ mood }) => ({
+  title: `${mood.charAt(0).toUpperCase() + mood.slice(1)} Reverie`,
+  reasoning: `This palette reflects the emotional tone of a ${mood} state.`,
+});
+
+export const explainableWorkshop = ({ mood, timeOfDay }) => ({
+  title:
+    mood === 'focused'
       ? 'Precision Brew Lab'
-      : 'Origin Stories & Cupping';
-  const reasoning = `Pairs ${mood || 'your'} vibe with ${timeOfDay || 'day'} attention spans for flow.`;
-  return { title, reasoning };
-};
-
-
-
-
-
-
+      : timeOfDay === 'evening'
+      ? 'Coffee Tasting Stories'
+      : 'Latte Art Experience',
+  reasoning: `Best suited for a ${mood} mindset during the ${timeOfDay}.`,
+});
