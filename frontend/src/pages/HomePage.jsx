@@ -108,9 +108,9 @@ const HomePage = () => {
           </section>
         </div>
       )}
-      <div data-scroll-section>
+      {/*<div data-scroll-section>
         <WhyRobusta />
-      </div>
+      </div>*/}
       <div data-scroll-section>
         <CoffeeMenu coffees={coffee} loading={loading} />
       </div>
