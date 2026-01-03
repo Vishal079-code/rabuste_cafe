@@ -43,3 +43,4 @@ export const explainableWorkshop = ({ mood, timeOfDay }) => ({
   reasoning: `Best suited for a ${mood} mindset during the ${timeOfDay}.`,
 });
 
+

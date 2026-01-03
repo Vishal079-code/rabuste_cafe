@@ -6,6 +6,7 @@ import { AuthProvider } from './context/AuthContext';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminMenu from './pages/AdminMenu';
 import HomePage from './pages/HomePage';
 import WhyRobustaPage from './pages/WhyRobustaPage';
 import MenuPage from './pages/MenuPage';
@@ -38,6 +39,7 @@ const App = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/menu" element={<AdminMenu />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </ErrorBoundary>

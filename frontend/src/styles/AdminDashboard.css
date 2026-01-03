@@ -244,3 +244,36 @@
   margin-top: 0;
   margin-right: 10px;
 }
+
+.admin-modal label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.875rem;
+  color: #ccc;
+  font-weight: 500;
+}
+
+.admin-modal label input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+.admin-modal .input {
+  width: 100%;
+  background: #111;
+  border: 1px solid #2a2a35;
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: white;
+  font-size: 0.875rem;
+  font-family: var(--font-body);
+  margin-bottom: 16px;
+}
+
+.admin-modal .input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.admin-modal select.input {
+  cursor: pointer;
+}

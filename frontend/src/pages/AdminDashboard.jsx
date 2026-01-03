@@ -269,7 +269,8 @@ const AdminDashboard = () => {
 
       {/* SIDEBAR */}
       <aside className="admin-sidebar" ref={sidebarRef}>
-        <h4 onClick={() => { setActiveSection('menu'); tl.current.reverse(); }}>🍽 Menu</h4>
+        <h4 onClick={() => { setActiveSection('menu'); tl.current.reverse(); }}>🍽 Menu Images</h4>
+        <h4 onClick={() => { navigate('/admin/menu'); tl.current.reverse(); }}>☕ Menu Items</h4>
         <h4 onClick={() => { setActiveSection('workshop'); tl.current.reverse(); }}>🎓 Workshops</h4>
         <h4 onClick={() => { setActiveSection('art'); tl.current.reverse(); }}>🎨 Art</h4>
 

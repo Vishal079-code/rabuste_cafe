@@ -42,21 +42,61 @@ exports.getItems = async (req, res) => {
 /* ---------------- ADMIN ---------------- */
 
 exports.createItem = async (req, res) => {
-  const { MenuItem } = getModels();
-  const item = await MenuItem.create(req.body);
-  res.json(item);
+  try {
+    const { MenuItem } = getModels();
+    const itemData = {
+      name: req.body.name,
+      groupId: req.body.groupId,
+      displayOrder: req.body.displayOrder || 0,
+      isActive: req.body.isActive !== false,
+      prices: req.body.prices || []
+    };
+    const item = await MenuItem.create(itemData);
+    res.status(201).json(item);
+  } catch (err) {
+    console.error('Create item error:', err);
+    res.status(500).json({ message: 'Failed to create item', error: err.message });
+  }
 };
 
 exports.updateItem = async (req, res) => {
-  const { MenuItem } = getModels();
-  const item = await MenuItem.findByIdAndUpdate(req.params.id, req.body, { new: true });
-  res.json(item);
+  try {
+    const { MenuItem } = getModels();
+    const updateData = {
+      name: req.body.name,
+      isActive: req.body.isActive,
+      prices: req.body.prices
+    };
+    if (req.body.displayOrder !== undefined) {
+      updateData.displayOrder = req.body.displayOrder;
+    }
+    const item = await MenuItem.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true, runValidators: true }
+    );
+    if (!item) {
+      return res.status(404).json({ message: 'Item not found' });
+    }
+    res.json(item);
+  } catch (err) {
+    console.error('Update item error:', err);
+    res.status(500).json({ message: 'Failed to update item', error: err.message });
+  }
 };
 
 exports.deleteItem = async (req, res) => {
-  const { MenuItem } = getModels();
-  await MenuItem.findByIdAndDelete(req.params.id);
-  res.json({ message: 'Item deleted' });
+  try {
+    const { MenuItem } = getModels();
+    const item = await MenuItem.findByIdAndDelete(req.params.id);
+    if (!item) {
+      return res.status(404).json({ message: 'Item not found' });
+    }
+    res.json({ message: 'Item deleted successfully' });
+  } catch (err) {
+    console.error('Delete item error:', err);
+    res.status(500).json({ message: 'Failed to delete item', error: err.message });
+  }
 };
 
 exports.updateStock = async (req, res) => {
@@ -93,4 +133,21 @@ exports.removePrice = async (req, res) => {
   item.prices.id(req.params.priceId).remove();
   await item.save();
   res.json(item);
+};
+
+exports.createGroup = async (req, res) => {
+  try {
+    const { MenuGroup } = getModels();
+    const groupData = {
+      name: req.body.name,
+      subCategoryId: req.body.subCategoryId,
+      displayOrder: req.body.displayOrder || 0,
+      isActive: req.body.isActive !== false
+    };
+    const group = await MenuGroup.create(groupData);
+    res.status(201).json(group);
+  } catch (err) {
+    console.error('Create group error:', err);
+    res.status(500).json({ message: 'Failed to create group', error: err.message });
+  }
 };
