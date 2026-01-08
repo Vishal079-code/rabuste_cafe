@@ -15,6 +15,9 @@ import {
   adminCreateArt,
   adminUpdateArt,
   adminDeleteArt,
+  adminGetBookings,
+  adminAcceptBooking,
+  adminRejectBooking,
 } from '../services/api';
 
 import '../styles/AdminDashboard.css';
@@ -31,6 +34,7 @@ const AdminDashboard = () => {
   const [menuItems, setMenuItems] = useState([]);
   const [workshopItems, setWorkshopItems] = useState([]);
   const [artItems, setArtItems] = useState([]);
+  const [bookings, setBookings] = useState([]);
   const [loadingItems, setLoadingItems] = useState(false);
   const [error, setError] = useState('');
 
@@ -102,10 +106,24 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchBookings = async () => {
+    setLoadingItems(true);
+    setError('');
+    try {
+      const res = await adminGetBookings();
+      setBookings(res.data);
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Failed to load bookings');
+    } finally {
+      setLoadingItems(false);
+    }
+  };
+
   useEffect(() => {
     if (activeSection === 'menu') fetchMenuItems();
     if (activeSection === 'workshop') fetchWorkshopItems();
     if (activeSection === 'art') fetchArtItems();
+    if (activeSection === 'bookings') fetchBookings();
   }, [activeSection]);
 
   /* ===== GSAP SIDEBAR ===== */
@@ -273,6 +291,7 @@ const AdminDashboard = () => {
         <h4 onClick={() => { navigate('/admin/menu'); tl.current.reverse(); }}>☕ Menu Items</h4>
         <h4 onClick={() => { setActiveSection('workshop'); tl.current.reverse(); }}>🎓 Workshops</h4>
         <h4 onClick={() => { setActiveSection('art'); tl.current.reverse(); }}>🎨 Art</h4>
+        <h4 onClick={() => { setActiveSection('bookings'); tl.current.reverse(); }}>📋 Art Bookings</h4>
 
         {/* CLOSE BUTTON AT BOTTOM */}
         <i
@@ -498,6 +517,160 @@ const AdminDashboard = () => {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {activeSection === 'bookings' && (
+          <>
+            <div className="admin-card">
+              <h3>Art Bookings ({bookings.length})</h3>
+              {loadingItems ? (
+                <p>Loading...</p>
+              ) : bookings.length === 0 ? (
+                <p>No bookings yet</p>
+              ) : (
+                <div style={{ marginTop: '20px', overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '2px solid #2a2a35' }}>
+                        <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>Art Name</th>
+                        <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>Customer</th>
+                        <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>Phone</th>
+                        <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>Email</th>
+                        <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>Message</th>
+                        <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>Status</th>
+                        <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>Date</th>
+                        <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {bookings.map((booking) => (
+                        <tr 
+                          key={booking._id} 
+                          style={{ 
+                            borderBottom: '1px solid #2a2a35',
+                            transition: 'background 0.2s',
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 122, 24, 0.05)'}
+                          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                        >
+                          <td style={{ padding: '12px', color: '#fff', fontSize: '0.875rem' }}>
+                            <strong>{booking.artName}</strong>
+                          </td>
+                          <td style={{ padding: '12px', color: '#ccc', fontSize: '0.875rem' }}>
+                            {booking.userName}
+                          </td>
+                          <td style={{ padding: '12px', color: '#ccc', fontSize: '0.875rem' }}>
+                            {booking.phone}
+                          </td>
+                          <td style={{ padding: '12px', color: '#ccc', fontSize: '0.875rem' }}>
+                            {booking.email || '-'}
+                          </td>
+                          <td style={{ padding: '12px', color: '#ccc', fontSize: '0.875rem', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {booking.message || '-'}
+                          </td>
+                          <td style={{ padding: '12px' }}>
+                            <span
+                              style={{
+                                padding: '4px 10px',
+                                borderRadius: '6px',
+                                fontSize: '0.75rem',
+                                fontWeight: '600',
+                                background: 
+                                  booking.status === 'ACCEPTED' 
+                                    ? 'rgba(76, 175, 80, 0.2)' 
+                                    : booking.status === 'REJECTED'
+                                    ? 'rgba(211, 47, 47, 0.2)'
+                                    : 'rgba(255, 193, 7, 0.2)',
+                                color: 
+                                  booking.status === 'ACCEPTED'
+                                    ? '#81c784'
+                                    : booking.status === 'REJECTED'
+                                    ? '#ff6b6b'
+                                    : '#ffc107',
+                                border: `1px solid ${
+                                  booking.status === 'ACCEPTED' 
+                                    ? 'rgba(76, 175, 80, 0.4)' 
+                                    : booking.status === 'REJECTED'
+                                    ? 'rgba(211, 47, 47, 0.4)'
+                                    : 'rgba(255, 193, 7, 0.4)'
+                                }`,
+                              }}
+                            >
+                              {booking.status}
+                            </span>
+                          </td>
+                          <td style={{ padding: '12px', color: '#999', fontSize: '0.75rem' }}>
+                            {new Date(booking.createdAt).toLocaleDateString()}
+                          </td>
+                          <td style={{ padding: '12px' }}>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                              {booking.status === 'PENDING' && (
+                                <>
+                                  <button
+                                    onClick={async () => {
+                                      setError('');
+                                      try {
+                                        await adminAcceptBooking(booking._id);
+                                        fetchBookings();
+                                        fetchArtItems(); // Refresh art items to show updated status
+                                      } catch (err) {
+                                        setError(err?.response?.data?.message || 'Failed to accept booking');
+                                      }
+                                    }}
+                                    style={{
+                                      padding: '6px 12px',
+                                      fontSize: '12px',
+                                      background: '#4caf50',
+                                      border: 'none',
+                                      borderRadius: '6px',
+                                      color: 'white',
+                                      cursor: 'pointer',
+                                      fontWeight: '600',
+                                    }}
+                                  >
+                                    Accept
+                                  </button>
+                                  <button
+                                    onClick={async () => {
+                                      setError('');
+                                      try {
+                                        await adminRejectBooking(booking._id);
+                                        fetchBookings();
+                                        fetchArtItems(); // Refresh art items to show updated status
+                                      } catch (err) {
+                                        setError(err?.response?.data?.message || 'Failed to reject booking');
+                                      }
+                                    }}
+                                    style={{
+                                      padding: '6px 12px',
+                                      fontSize: '12px',
+                                      background: '#d32f2f',
+                                      border: 'none',
+                                      borderRadius: '6px',
+                                      color: 'white',
+                                      cursor: 'pointer',
+                                      fontWeight: '600',
+                                    }}
+                                  >
+                                    Reject
+                                  </button>
+                                </>
+                              )}
+                              {booking.status !== 'PENDING' && (
+                                <span style={{ color: '#999', fontSize: '0.75rem' }}>
+                                  {booking.status === 'ACCEPTED' ? '✓ Accepted' : '✗ Rejected'}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </div>

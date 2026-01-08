@@ -3,6 +3,7 @@ const { authMiddleware, adminMiddleware } = require('../middleware/authMiddlewar
 const MenuImage = require('../models/MenuImage');
 const Workshop = require('../models/Workshop');
 const Art = require('../models/Art');
+const { getBookings, acceptBooking, rejectBooking } = require('../controllers/bookingController');
 
 const router = express.Router();
 
@@ -261,6 +262,15 @@ router.delete('/art/:id', async (req, res) => {
     res.status(500).json({ message: 'Failed to delete art listing' });
   }
 });
+
+// GET /api/admin/art/bookings - get all art bookings
+router.get('/art/bookings', getBookings);
+
+// PATCH /api/admin/art/bookings/:id/accept - accept booking
+router.patch('/art/bookings/:id/accept', acceptBooking);
+
+// PATCH /api/admin/art/bookings/:id/reject - reject booking
+router.patch('/art/bookings/:id/reject', rejectBooking);
 
 module.exports = router;
 

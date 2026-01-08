@@ -1,4 +1,20 @@
+import { useState } from 'react';
+import ArtModal from '../components/ArtModal';
+
 const ArtGallery = ({ art, loading, insights }) => {
+  const [selectedArt, setSelectedArt] = useState(null);
+  const [isArtModalOpen, setIsArtModalOpen] = useState(false);
+
+  const handleEnquireClick = (piece) => {
+    setSelectedArt(piece);
+    setIsArtModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsArtModalOpen(false);
+    setSelectedArt(null);
+  };
+
   return (
     <section id="art">
       <p className="section-kicker">Art Gallery</p>
@@ -38,15 +54,38 @@ const ArtGallery = ({ art, loading, insights }) => {
                 {piece.description}
               </p>
               <div className="flex" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
-                <span className={piece.availability === 'sold' ? 'sold' : 'availability'}>
-                  {piece.availability === 'sold' ? 'Sold' : piece.availability}
+                <span 
+                  className={piece.availability === 'sold' ? 'sold' : piece.availability === 'reserved' ? 'reserved' : 'availability'}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    fontSize: '0.75rem',
+                    fontWeight: '600',
+                    background: piece.availability === 'sold' 
+                      ? 'rgba(211, 47, 47, 0.2)' 
+                      : piece.availability === 'reserved'
+                      ? 'rgba(255, 193, 7, 0.2)'
+                      : 'rgba(76, 175, 80, 0.2)',
+                    color: piece.availability === 'sold'
+                      ? '#ff6b6b'
+                      : piece.availability === 'reserved'
+                      ? '#ffc107'
+                      : '#81c784',
+                    border: `1px solid ${piece.availability === 'sold' 
+                      ? 'rgba(211, 47, 47, 0.4)' 
+                      : piece.availability === 'reserved'
+                      ? 'rgba(255, 193, 7, 0.4)'
+                      : 'rgba(76, 175, 80, 0.4)'}`,
+                  }}
+                >
+                  {piece.availability === 'sold' ? 'SOLD' : piece.availability === 'reserved' ? 'RESERVED' : 'AVAILABLE'}
                 </span>
                 <span className="pill">${piece.price}</span>
               </div>
               <button
                 className="cta secondary"
                 style={{ marginTop: 12 }}
-                onClick={() => alert('We will route you to our concierge shortly.')}
+                onClick={() => handleEnquireClick(piece)}
                 disabled={piece.availability === 'sold'}
               >
                 Enquire / Buy
@@ -55,6 +94,13 @@ const ArtGallery = ({ art, loading, insights }) => {
           ))}
         </div>
       )}
+
+      {/* Art Modal */}
+      <ArtModal 
+        art={selectedArt} 
+        isOpen={isArtModalOpen} 
+        onClose={handleCloseModal} 
+      />
     </section>
   );
 };
