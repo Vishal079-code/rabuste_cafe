@@ -55,4 +55,9 @@ export const adminCreateArt = (payload) => api.post('/admin/art', payload);
 export const adminUpdateArt = (id, payload) => api.put(`/admin/art/${id}`, payload);
 export const adminDeleteArt = (id) => api.delete(`/admin/art/${id}`);
 
+export const bookArt = (payload) => api.post('/art/book', payload);
+export const adminGetBookings = () => api.get('/admin/art/bookings');
+export const adminAcceptBooking = (id) => api.patch(`/admin/art/bookings/${id}/accept`);
+export const adminRejectBooking = (id) => api.patch(`/admin/art/bookings/${id}/reject`);
+
 export default api;

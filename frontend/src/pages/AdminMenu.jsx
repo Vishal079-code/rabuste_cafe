@@ -44,8 +44,8 @@ const AdminMenu = () => {
   const [success, setSuccess] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
 
-  // Edit state
-  const [editingItem, setEditingItem] = useState(null);
+  // Edit state - use composite key to uniquely identify row location
+  const [editingKey, setEditingKey] = useState(null);
   const [editForm, setEditForm] = useState({
     name: '',
     price: '',
@@ -93,11 +93,15 @@ const AdminMenu = () => {
     }
   };
 
-  const handleEdit = (item) => {
+  const handleEdit = (item, categoryId, subCategoryId, section) => {
     const price = item.prices?.[0]?.price || 0;
     const inStock = item.prices?.[0]?.inStock !== false;
+    const itemId = String(item._id || item.id);
     
-    setEditingItem(item._id || item.id);
+    // Build composite key: categoryId|subCategoryId|section|itemId
+    const compositeKey = `${categoryId}|${subCategoryId}|${section}|${itemId}`;
+    
+    setEditingKey(compositeKey);
     setEditForm({
       name: item.name || '',
       price: price.toString(),
@@ -106,26 +110,22 @@ const AdminMenu = () => {
     });
   };
 
-  const handleSaveEdit = async () => {
-    if (!editingItem) return;
-    
-    setError('');
-    setSuccess('');
-    
-    try {
-      const item = menuData.items.find(i => (i._id?.toString() || i.id?.toString()) === editingItem?.toString());
-      if (!item) return;
+const handleSaveEdit = async () => {
+  if (!editingKey) return;
 
-      const updatedPrices = [...(item.prices || [])];
-      if (updatedPrices.length === 0) {
-        updatedPrices.push({ size: 'regular', price: 0, inStock: true });
-      }
-      updatedPrices[0].price = parseFloat(editForm.price) || 0;
-      updatedPrices[0].inStock = editForm.inStock;
+  setError('');
+  setSuccess('');
 
-      const token = localStorage.getItem('rabuste_token');
-      const itemId = item._id || item.id;
-      const res = await fetch(`http://localhost:5000/api/admin/menu/item/${itemId}`, {
+  try {
+    // Extract itemId from composite key (last part after final |)
+    const parts = editingKey.split('|');
+    const itemId = parts[parts.length - 1];
+    
+    const token = localStorage.getItem('rabuste_token');
+
+    const res = await fetch(
+      `http://localhost:5000/api/admin/menu/item/${itemId}`,
+      {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -133,24 +133,30 @@ const AdminMenu = () => {
         },
         body: JSON.stringify({
           name: editForm.name,
-          prices: updatedPrices,
+          prices: [{
+            size: 'regular',
+            price: parseFloat(editForm.price) || 0,
+            inStock: editForm.inStock
+          }],
           isActive: editForm.isActive
         })
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || 'Failed to update item');
       }
+    );
 
-      setSuccess('Item updated successfully');
-      setEditingItem(null);
-      await fetchMenuData();
-      setTimeout(() => setSuccess(''), 3000);
-    } catch (err) {
-      setError(err.message || 'Failed to update item');
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || 'Failed to update item');
     }
-  };
+
+    setSuccess('Item updated successfully');
+    setEditingKey(null);
+    await fetchMenuData();
+    setTimeout(() => setSuccess(''), 3000);
+  } catch (err) {
+    setError(err.message || 'Failed to update item');
+  }
+};
+
 
   const handleDelete = async (itemId, itemName) => {
     if (!confirm(`Delete "${itemName}"? This cannot be undone.`)) return;
@@ -208,20 +214,23 @@ const AdminMenu = () => {
     }
 
     try {
-      // Find the subcategory - it should have category field as string
+      // Find the subcategory by derived string ID (like MenuViewer)
       const subCategory = menuData.subCategories.find(
-        sc => (sc._id?.toString() || sc.id?.toString()) === addForm.subCategoryId?.toString()
+        sc => {
+          const derivedSubId = buildSubCategoryId(addForm.categoryId, sc.name);
+          return derivedSubId === addForm.subCategoryId;
+        }
       );
       if (!subCategory) {
         throw new Error('Subcategory not found');
       }
 
-      // Find or create the group (section) - match by subCategoryId ObjectId
+      // Find or create the group (section) - match by subCategoryId ObjectId (for backend)
+      const subCategoryObjectId = subCategory._id || subCategory.id;
       let group = menuData.groups.find(
         g => {
           const gSubCategoryId = g.subCategoryId?.toString();
-          const formSubCategoryId = subCategory._id?.toString() || subCategory.id?.toString();
-          return gSubCategoryId === formSubCategoryId && g.name === addForm.section;
+          return gSubCategoryId === subCategoryObjectId?.toString() && g.name === addForm.section;
         }
       );
 
@@ -236,7 +245,7 @@ const AdminMenu = () => {
           },
           body: JSON.stringify({
             name: addForm.section,
-            subCategoryId: addForm.subCategoryId,
+            subCategoryId: subCategoryObjectId,
             displayOrder: 0,
             isActive: true
           })
@@ -500,8 +509,10 @@ const AdminMenu = () => {
                     textTransform: 'uppercase'
                   }}>{subCategory.name}</h4>
 
-                  {subCategoryData.map(({ section, items }) => (
-                    <div key={`${subId}-${section}`} style={{ 
+                  {subCategoryData.map(({ section, items }) => {
+                    const sectionKey = `${subId}-${section}`;
+                    return (
+                    <div key={sectionKey} style={{ 
                       marginBottom: '24px',
                       padding: '20px',
                       background: 'rgba(24, 18, 16, 0.6)',
@@ -517,13 +528,24 @@ const AdminMenu = () => {
 
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                         {items.map(item => {
-                          const isEditing = editingItem === (item._id || item.id);
-                          const price = item.prices?.[0]?.price || 0;
-                          const inStock = item.prices?.[0]?.inStock !== false;
+                          // Get stable item ID
+                          const itemId = String(item._id || item.id);
+                          
+                          // Build composite key for this row: categoryId|subCategoryId|section|itemId
+                          const rowKey = `${selectedCategory}|${subId}|${section}|${itemId}`;
+                          
+                          // Only this exact row should be in edit mode
+                          const isEditing = editingKey === rowKey;
+                          
+                          // ALWAYS compute from item properties (never from editForm)
+                          const itemPrice = item.prices?.[0]?.price || 0;
+                          const itemInStock = item.prices?.[0]?.inStock !== false;
+                          const itemName = item.name || '';
+                          const itemIsActive = item.isActive !== false;
 
                           return (
                             <div
-                              key={item._id || item.id}
+                              key={rowKey}
                               style={{
                                 display: 'flex',
                                 gap: '12px',
@@ -531,12 +553,12 @@ const AdminMenu = () => {
                                 padding: '12px',
                                 background: 'rgba(15, 12, 10, 0.8)',
                                 borderRadius: '8px',
-                                opacity: item.isActive === false ? 0.5 : 1,
+                                opacity: itemIsActive ? 1 : 0.5,
                                 border: '1px solid rgba(216, 107, 50, 0.15)'
                               }}
                             >
                               {isEditing ? (
-                                <>
+                                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', width: '100%', flexWrap: 'wrap' }}>
                                   <input
                                     type="text"
                                     value={editForm.name}
@@ -576,30 +598,30 @@ const AdminMenu = () => {
                                     Save
                                   </button>
                                   <button
-                                    onClick={() => setEditingItem(null)}
+                                    onClick={() => setEditingKey(null)}
                                     className="cta secondary"
                                     style={{ padding: '8px 16px', fontSize: '0.875rem' }}
                                   >
                                     Cancel
                                   </button>
-                                </>
+                                </div>
                               ) : (
-                                <>
+                                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', width: '100%' }}>
                                   <div style={{ flex: 1 }}>
-                                    <strong>{item.name}</strong>
+                                    <strong>{itemName}</strong>
                                     <div style={{ fontSize: '0.875rem', color: 'var(--muted)', marginTop: '4px' }}>
-                                      ₹{price} {!inStock && '• Out of Stock'} {item.isActive === false && '• Inactive'}
+                                      ₹{itemPrice} {!itemInStock && '• Out of Stock'} {!itemIsActive && '• Inactive'}
                                     </div>
                                   </div>
                                   <button
-                                    onClick={() => handleEdit(item)}
+                                    onClick={() => handleEdit(item, selectedCategory, subId, section)}
                                     className="cta secondary"
                                     style={{ padding: '6px 12px', fontSize: '0.8125rem' }}
                                   >
                                     Edit
                                   </button>
                                   <button
-                                    onClick={() => handleDelete(item._id, item.name)}
+                                    onClick={() => handleDelete(itemId, itemName)}
                                     style={{
                                       padding: '6px 12px',
                                       fontSize: '0.8125rem',
@@ -612,14 +634,15 @@ const AdminMenu = () => {
                                   >
                                     Delete
                                   </button>
-                                </>
+                                </div>
                               )}
                             </div>
                           );
                         })}
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               );
             })}
@@ -686,11 +709,14 @@ const AdminMenu = () => {
                     disabled={!addForm.categoryId}
                   >
                     <option value="">Select Subcategory</option>
-                    {availableSubCategories.map(sc => (
-                      <option key={sc._id || sc.id} value={sc._id || sc.id}>
-                        {sc.name}
-                      </option>
-                    ))}
+                    {availableSubCategories.map(sc => {
+                      const derivedSubId = buildSubCategoryId(addForm.categoryId, sc.name);
+                      return (
+                        <option key={derivedSubId} value={derivedSubId}>
+                          {sc.name}
+                        </option>
+                      );
+                    })}
                   </select>
                 </label>
 
