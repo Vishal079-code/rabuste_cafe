@@ -18,6 +18,7 @@ import {
   adminGetBookings,
   adminAcceptBooking,
   adminRejectBooking,
+  adminGetWorkshopRegistrations,
 } from '../services/api';
 
 import '../styles/AdminDashboard.css';
@@ -35,6 +36,7 @@ const AdminDashboard = () => {
   const [workshopItems, setWorkshopItems] = useState([]);
   const [artItems, setArtItems] = useState([]);
   const [bookings, setBookings] = useState([]);
+  const [workshopRegistrations, setWorkshopRegistrations] = useState([]);
   const [loadingItems, setLoadingItems] = useState(false);
   const [error, setError] = useState('');
 
@@ -119,11 +121,25 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchWorkshopRegistrations = async () => {
+    setLoadingItems(true);
+    setError('');
+    try {
+      const res = await adminGetWorkshopRegistrations();
+      setWorkshopRegistrations(res.data);
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Failed to load workshop registrations');
+    } finally {
+      setLoadingItems(false);
+    }
+  };
+
   useEffect(() => {
     if (activeSection === 'menu') fetchMenuItems();
     if (activeSection === 'workshop') fetchWorkshopItems();
     if (activeSection === 'art') fetchArtItems();
     if (activeSection === 'bookings') fetchBookings();
+    if (activeSection === 'workshop-registrations') fetchWorkshopRegistrations();
   }, [activeSection]);
 
   /* ===== GSAP SIDEBAR ===== */
@@ -290,6 +306,7 @@ const AdminDashboard = () => {
         <h4 onClick={() => { setActiveSection('menu'); tl.current.reverse(); }}>🍽 Menu Images</h4>
         <h4 onClick={() => { navigate('/admin/menu'); tl.current.reverse(); }}>☕ Menu Items</h4>
         <h4 onClick={() => { setActiveSection('workshop'); tl.current.reverse(); }}>🎓 Workshops</h4>
+        <h4 onClick={() => { setActiveSection('workshop-registrations'); tl.current.reverse(); }}>📝 Workshop Registrations</h4>
         <h4 onClick={() => { setActiveSection('art'); tl.current.reverse(); }}>🎨 Art</h4>
         <h4 onClick={() => { setActiveSection('bookings'); tl.current.reverse(); }}>📋 Art Bookings</h4>
 
@@ -439,6 +456,62 @@ const AdminDashboard = () => {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {activeSection === 'workshop-registrations' && (
+          <>
+            <div className="admin-card">
+              <h3>Workshop Registrations ({workshopRegistrations.length})</h3>
+              {loadingItems ? (
+                <p>Loading...</p>
+              ) : workshopRegistrations.length === 0 ? (
+                <p>No registrations yet</p>
+              ) : (
+                <div style={{ marginTop: '20px', overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '2px solid #2a2a35' }}>
+                        <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>Workshop Title</th>
+                        <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>Name</th>
+                        <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>Phone</th>
+                        <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>Email</th>
+                        <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>Date Registered</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {workshopRegistrations.map((registration) => (
+                        <tr 
+                          key={registration._id} 
+                          style={{ 
+                            borderBottom: '1px solid #2a2a35',
+                            transition: 'background 0.2s',
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 122, 24, 0.05)'}
+                          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                        >
+                          <td style={{ padding: '12px', color: '#fff', fontSize: '0.875rem' }}>
+                            <strong>{registration.workshopTitle}</strong>
+                          </td>
+                          <td style={{ padding: '12px', color: '#ccc', fontSize: '0.875rem' }}>
+                            {registration.name}
+                          </td>
+                          <td style={{ padding: '12px', color: '#ccc', fontSize: '0.875rem' }}>
+                            {registration.phone}
+                          </td>
+                          <td style={{ padding: '12px', color: '#ccc', fontSize: '0.875rem' }}>
+                            {registration.email || '-'}
+                          </td>
+                          <td style={{ padding: '12px', color: '#999', fontSize: '0.75rem' }}>
+                            {new Date(registration.createdAt).toLocaleDateString()}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </div>
