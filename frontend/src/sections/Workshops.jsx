@@ -2,7 +2,13 @@ import { useState } from 'react';
 import { registerWorkshop } from '../services/api';
 
 const Workshops = ({ workshops, loading }) => {
-  const [form, setForm] = useState({ workshopId: '', name: '', email: '' });
+  const [form, setForm] = useState({ 
+    workshopId: '', 
+    workshopTitle: '',
+    name: '', 
+    phone: '',
+    email: '' 
+  });
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -15,11 +21,29 @@ const Workshops = ({ workshops, loading }) => {
     try {
       const res = await registerWorkshop(form);
       setMessage(res.data.message);
+      // Clear form on success
+      setForm({ 
+        workshopId: '', 
+        workshopTitle: '',
+        name: '', 
+        phone: '',
+        email: '' 
+      });
     } catch (err) {
       setError(err?.response?.data?.message || 'Could not register');
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleWorkshopSelect = (e) => {
+    const selectedId = e.target.value;
+    const selectedWorkshop = workshops.find(w => w._id === selectedId);
+    setForm({
+      ...form,
+      workshopId: selectedId,
+      workshopTitle: selectedWorkshop ? selectedWorkshop.title : '',
+    });
   };
 
   return (
@@ -59,7 +83,7 @@ const Workshops = ({ workshops, loading }) => {
               <select
                 className="input"
                 value={form.workshopId}
-                onChange={(e) => setForm({ ...form, workshopId: e.target.value })}
+                onChange={handleWorkshopSelect}
                 required
               >
                 <option value="">Select a workshop</option>
@@ -71,17 +95,25 @@ const Workshops = ({ workshops, loading }) => {
               </select>
               <input
                 className="input"
-                placeholder="Your name"
+                placeholder="Your name *"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 required
               />
               <input
                 className="input"
-                placeholder="Email"
+                type="tel"
+                placeholder="Phone number *"
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                required
+              />
+              <input
+                className="input"
+                type="email"
+                placeholder="Email (optional)"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                required
               />
               <button className="cta" type="submit" disabled={submitting}>
                 {submitting ? 'Booking…' : 'Save my seat'}

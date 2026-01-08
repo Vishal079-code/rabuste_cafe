@@ -49,6 +49,7 @@ export const adminGetWorkshops = () => api.get('/admin/workshops');
 export const adminCreateWorkshop = (payload) => api.post('/admin/workshops', payload);
 export const adminUpdateWorkshop = (id, payload) => api.put(`/admin/workshops/${id}`, payload);
 export const adminDeleteWorkshop = (id) => api.delete(`/admin/workshops/${id}`);
+export const adminGetWorkshopRegistrations = () => api.get('/admin/workshops/registrations');
 
 export const adminGetArt = () => api.get('/admin/art');
 export const adminCreateArt = (payload) => api.post('/admin/art', payload);

@@ -4,6 +4,7 @@ const MenuImage = require('../models/MenuImage');
 const Workshop = require('../models/Workshop');
 const Art = require('../models/Art');
 const { getBookings, acceptBooking, rejectBooking } = require('../controllers/bookingController');
+const { getWorkshopRegistrations } = require('../controllers/workshopController');
 
 const router = express.Router();
 
@@ -204,6 +205,9 @@ router.delete('/workshops/:id', async (req, res) => {
     res.status(500).json({ message: 'Failed to delete workshop' });
   }
 });
+
+// GET /api/admin/workshops/registrations - get all workshop registrations
+router.get('/workshops/registrations', getWorkshopRegistrations);
 
 // PUT /api/admin/art/:id - update art listing
 router.put('/art/:id', async (req, res) => {
