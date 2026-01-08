@@ -5,6 +5,7 @@ const Workshop = require('../models/Workshop');
 const Art = require('../models/Art');
 const { getBookings, acceptBooking, rejectBooking } = require('../controllers/bookingController');
 const { getWorkshopRegistrations } = require('../controllers/workshopController');
+const { getEnquiries, updateEnquiryStatus } = require('../controllers/franchiseController');
 
 const router = express.Router();
 
@@ -275,6 +276,12 @@ router.patch('/art/bookings/:id/accept', acceptBooking);
 
 // PATCH /api/admin/art/bookings/:id/reject - reject booking
 router.patch('/art/bookings/:id/reject', rejectBooking);
+
+// GET /api/admin/franchise/enquiries - get all franchise enquiries
+router.get('/franchise/enquiries', getEnquiries);
+
+// PATCH /api/admin/franchise/enquiries/:id/status - update enquiry status
+router.patch('/franchise/enquiries/:id/status', updateEnquiryStatus);
 
 module.exports = router;
 
