@@ -39,7 +39,7 @@ const Footer = () => {
           <h4>Connect with us</h4>
           <ul>
             <li>
-              Instagram: <a href="#">@rabuste.coffee</a>
+              Instagram: <a href="https://www.instagram.com/rabuste.coffee/">@rabuste.coffee</a>
             </li>
             <li>
               Twitter/X: <a href="#">@rabuste</a>
@@ -54,8 +54,17 @@ const Footer = () => {
           <h4>Customer Care</h4>
           <ul>
             <li>📞 +91 98765 43210</li>
-            <li>🕘 Mon–Sat, 9am–6pm</li>
-            <li>📍 India</li>
+            <li>🕘 Mon–Sat, 9:30am–11pm</li>
+            <li>
+  📍{" "}
+  <a
+    href="https://google.com/maps/place/rabuste/data=!4m2!3m1!1s0x3be04d00111b19b5:0xba45eb84da00c79f?sa=X&ved=1t:242&ictx=111"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    Rabuste Cafe, India
+  </a>
+</li>
           </ul>
         </div>
       </div>
@@ -68,6 +77,7 @@ const Footer = () => {
 };
 
 export default Footer;
+
 
 
 
