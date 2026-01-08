@@ -1002,3 +1002,15 @@ a:not(.cta):hover {
   border-color: var(--accent-soft);
   box-shadow: 0 0 0 2px rgba(216, 107, 50, 0.35);
 }
+.hero-handwritten {
+  margin: 20px 0 28px;
+  display: flex;
+  justify-content: center;
+}
+
+/* THIS controls size */
+.hero-handwritten svg {
+  width: 900px;      /* ⬅️ increase this */
+  max-width: 95vw;
+  height: auto;
+}

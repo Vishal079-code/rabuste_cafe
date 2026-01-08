@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import CoffeeSteam from '../components/CoffeeSteam';
+import HandwrittenText from '../components/HandwrittenText';
 
 const Hero = () => {
   return (
@@ -14,12 +15,13 @@ const Hero = () => {
           Robusta-only. Coffee × Art × Tech
         </p>
 
-        <h1
-          className="animate-fade-up"
+        {/* ✍️ HANDWRITTEN HEADLINE */}
+        <div
+          className="hero-handwritten animate-fade-up"
           style={{ animationDelay: '0.4s' }}
         >
-          Rabuste is a cozy, bold home for people who like their coffee loud.
-        </h1>
+          <HandwrittenText text="Rabuste is a cozy, bold home" />
+        </div>
 
         <p
           className="animate-fade-up"
