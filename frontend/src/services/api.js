@@ -61,4 +61,7 @@ export const adminGetBookings = () => api.get('/admin/art/bookings');
 export const adminAcceptBooking = (id) => api.patch(`/admin/art/bookings/${id}/accept`);
 export const adminRejectBooking = (id) => api.patch(`/admin/art/bookings/${id}/reject`);
 
+export const adminGetFranchiseEnquiries = () => api.get('/admin/franchise/enquiries');
+export const adminUpdateEnquiryStatus = (id, status) => api.patch(`/admin/franchise/enquiries/${id}/status`, { status });
+
 export default api;

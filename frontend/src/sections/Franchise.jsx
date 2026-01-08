@@ -2,7 +2,14 @@ import { useState } from 'react';
 import { submitFranchise } from '../services/api';
 
 const Franchise = () => {
-  const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
+  const [form, setForm] = useState({ 
+    fullName: '', 
+    phone: '', 
+    city: '',
+    email: '', 
+    investmentRange: '',
+    message: '' 
+  });
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -14,8 +21,16 @@ const Franchise = () => {
     setSubmitting(true);
     try {
       const res = await submitFranchise(form);
-      setStatus(res.data.message);
-      setForm({ name: '', email: '', phone: '', message: '' });
+      setStatus(res.data.message || 'We\'ll contact you soon.');
+      // Reset form on success
+      setForm({ 
+        fullName: '', 
+        phone: '', 
+        city: '',
+        email: '', 
+        investmentRange: '',
+        message: '' 
+      });
     } catch (err) {
       setError(err?.response?.data?.message || 'Could not submit');
     } finally {
@@ -53,32 +68,45 @@ const Franchise = () => {
           <form onSubmit={onSubmit} className="grid">
             <input
               className="input"
-              placeholder="Name"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              placeholder="Full Name *"
+              value={form.fullName}
+              onChange={(e) => setForm({ ...form, fullName: e.target.value })}
               required
             />
             <input
               className="input"
-              placeholder="Email"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              required
-            />
-            <input
-              className="input"
-              placeholder="Phone"
+              type="tel"
+              placeholder="Phone *"
               value={form.phone}
               onChange={(e) => setForm({ ...form, phone: e.target.value })}
               required
             />
+            <input
+              className="input"
+              placeholder="City *"
+              value={form.city}
+              onChange={(e) => setForm({ ...form, city: e.target.value })}
+              required
+            />
+            <input
+              className="input"
+              type="email"
+              placeholder="Email (optional)"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+            />
+            <input
+              className="input"
+              placeholder="Investment Range (optional)"
+              value={form.investmentRange}
+              onChange={(e) => setForm({ ...form, investmentRange: e.target.value })}
+            />
             <textarea
               className="input"
               style={{ minHeight: 96 }}
-              placeholder="Tell us about your city"
+              placeholder="Message (optional)"
               value={form.message}
               onChange={(e) => setForm({ ...form, message: e.target.value })}
-              required
             />
             <button className="cta" type="submit" disabled={submitting}>
               {submitting ? 'Sending…' : 'Send enquiry'}
