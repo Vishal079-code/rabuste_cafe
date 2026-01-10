@@ -1,5 +1,6 @@
 // backend/src/controllers/orderController.js
 const getOrderModel = require('../models/Order');
+const { generateUniqueOrderToken } = require('../utils/tokenGenerator');
 
 // PUBLIC: Create new order
 exports.createOrder = async (req, res) => {
@@ -60,7 +61,14 @@ exports.createOrder = async (req, res) => {
     if (populatedItems.length === 0) return res.status(400).json({ message: 'No valid items in cart' });
 
     // Determine payment status based on payment method
-    const paymentStatus = paymentMethod === 'PAY_NOW' ? 'PAID' : 'PENDING';
+    // PAY_NOW: PAID_UNVERIFIED (placeholder, waiting for verification)
+    // PAY_AT_COUNTER: PENDING (waiting for staff to collect cash)
+    const paymentStatus = paymentMethod === 'PAY_NOW' ? 'PAID_UNVERIFIED' : 'PENDING';
+
+    // Generate unique order token for payment verification
+    const orderToken = await generateUniqueOrderToken(async (token) => {
+      return await Order.findOne({ orderToken: token });
+    });
 
     // Create order
     const order = new Order({
@@ -69,11 +77,25 @@ exports.createOrder = async (req, res) => {
       totalAmount,
       paymentMethod,
       paymentStatus,
+      orderToken,
       pickupTime: pickupDate,
       status: 'PENDING',
     });
 
+    console.log('📋 Order before save:', {
+      hasOrderId: !!order.orderId,
+      hasOrderToken: !!order.orderToken,
+      itemsCount: order.items.length,
+      paymentMethod: order.paymentMethod,
+    });
+
     await order.save();
+
+    console.log('✅ Order saved successfully:', {
+      orderId: order.orderId,
+      orderToken: order.orderToken,
+      _id: order._id,
+    });
 
     // Clear user's cart
     const getCartModel = require('../models/Cart');
@@ -151,5 +173,74 @@ exports.completeOrder = async (req, res) => {
   } catch (err) {
     console.error('Complete order error:', err);
     res.status(500).json({ message: 'Failed to complete order', error: err.message });
+  }
+};
+
+// ADMIN: Mark PAY_AT_COUNTER order as paid (staff collected cash)
+exports.markAsPaid = async (req, res) => {
+  try {
+    const Order = getOrderModel();
+    const { id } = req.params;
+
+    const order = await Order.findById(id);
+
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    if (order.paymentMethod !== 'PAY_AT_COUNTER') {
+      return res.status(400).json({ message: 'This action is only for PAY_AT_COUNTER orders' });
+    }
+
+    if (order.paymentStatus === 'PAID') {
+      return res.status(400).json({ message: 'Order payment is already verified' });
+    }
+
+    // Update payment status to PAID
+    order.paymentStatus = 'PAID';
+    await order.save();
+
+    res.json({
+      message: 'Order marked as paid successfully',
+      order,
+    });
+  } catch (err) {
+    console.error('Mark as paid error:', err);
+    res.status(500).json({ message: 'Failed to mark order as paid', error: err.message });
+  }
+};
+
+// ADMIN: Verify PAY_NOW order and complete it
+exports.verifyAndComplete = async (req, res) => {
+  try {
+    const Order = getOrderModel();
+    const { id } = req.params;
+
+    const order = await Order.findById(id);
+
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    if (order.paymentMethod !== 'PAY_NOW') {
+      return res.status(400).json({ message: 'This action is only for PAY_NOW orders' });
+    }
+
+    if (order.status === 'COMPLETED') {
+      return res.status(400).json({ message: 'Order is already completed' });
+    }
+
+    // Update payment status to PAID and order status to COMPLETED
+    order.paymentStatus = 'PAID';
+    order.status = 'COMPLETED';
+    await order.save();
+
+    res.json({
+      message: 'Order verified and completed successfully',
+      order,
+    });
+  } catch (err) {
+    console.error('Verify and complete error:', err);
+    res.status(500).json({ message: 'Failed to verify and complete order', error: err.message });
   }
 };

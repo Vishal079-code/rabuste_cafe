@@ -23,6 +23,8 @@ import {
   adminUpdateEnquiryStatus,
   adminGetOrders,
   adminCompleteOrder,
+  adminMarkOrderAsPaid,
+  adminVerifyAndCompleteOrder,
 } from '../services/api';
 
 import '../styles/AdminDashboard.css';
@@ -159,9 +161,15 @@ const AdminDashboard = () => {
     setError('');
     try {
       const res = await adminGetOrders(filter);
-      setOrders(res.data || []);
+      console.log('📦 Orders API response:', res.data);
+      
+      // Handle response - res.data should be the array of orders
+      const ordersArray = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+      setOrders(ordersArray);
     } catch (err) {
+      console.error('Fetch orders error:', err);
       setError(err?.response?.data?.message || 'Failed to load orders');
+      setOrders([]);
     } finally {
       setLoadingItems(false);
     }
@@ -988,6 +996,7 @@ const AdminDashboard = () => {
                     <thead>
                       <tr style={{ borderBottom: '2px solid #2a2a35' }}>
                         <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>Order ID</th>
+                        <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>Token</th>
                         <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>User</th>
                         <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>Items</th>
                         <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>Total</th>
@@ -1012,6 +1021,9 @@ const AdminDashboard = () => {
                         >
                           <td style={{ padding: '12px', color: '#fff', fontSize: '0.875rem', fontWeight: '600' }}>
                             {order.orderId}
+                          </td>
+                          <td style={{ padding: '12px', color: '#ff7a18', fontSize: '0.875rem', fontWeight: '600' }}>
+                            {order.orderToken || '-'}
                           </td>
                           <td style={{ padding: '12px', color: '#ccc', fontSize: '0.875rem' }}>
                             {order.user?.name || order.user?.email || 'Unknown'}
@@ -1069,29 +1081,86 @@ const AdminDashboard = () => {
                           </td>
                           <td style={{ padding: '12px' }}>
                             {order.status === 'PENDING' && (
-                              <button
-                                onClick={async () => {
-                                  setError('');
-                                  try {
-                                    await adminCompleteOrder(order._id);
-                                    setOrders(prev => prev.filter(o => o._id !== order._id));
-                                  } catch (err) {
-                                    setError(err?.response?.data?.message || 'Failed to complete order');
-                                  }
-                                }}
-                                style={{
-                                  padding: '6px 12px',
-                                  fontSize: '12px',
-                                  background: '#4caf50',
-                                  border: 'none',
-                                  borderRadius: '6px',
-                                  color: 'white',
-                                  cursor: 'pointer',
-                                  fontWeight: '600',
-                                }}
-                              >
-                                Complete Order
-                              </button>
+                              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                {/* PAY_AT_COUNTER: Show "Mark as Paid" if not yet paid */}
+                                {order.paymentMethod === 'PAY_AT_COUNTER' && order.paymentStatus !== 'PAID' && (
+                                  <button
+                                    onClick={async () => {
+                                      setError('');
+                                      try {
+                                        await adminMarkOrderAsPaid(order._id);
+                                        fetchOrders(orderFilter);
+                                      } catch (err) {
+                                        setError(err?.response?.data?.message || 'Failed to mark order as paid');
+                                      }
+                                    }}
+                                    style={{
+                                      padding: '6px 12px',
+                                      fontSize: '12px',
+                                      background: '#2196F3',
+                                      border: 'none',
+                                      borderRadius: '6px',
+                                      color: 'white',
+                                      cursor: 'pointer',
+                                      fontWeight: '600',
+                                    }}
+                                  >
+                                    Mark as Paid
+                                  </button>
+                                )}
+                                {/* PAY_NOW: Show "Verify & Complete" if payment unverified */}
+                                {order.paymentMethod === 'PAY_NOW' && order.paymentStatus === 'PAID_UNVERIFIED' && (
+                                  <button
+                                    onClick={async () => {
+                                      setError('');
+                                      try {
+                                        await adminVerifyAndCompleteOrder(order._id);
+                                        setOrders(prev => prev.filter(o => o._id !== order._id));
+                                      } catch (err) {
+                                        setError(err?.response?.data?.message || 'Failed to verify and complete order');
+                                      }
+                                    }}
+                                    style={{
+                                      padding: '6px 12px',
+                                      fontSize: '12px',
+                                      background: '#4caf50',
+                                      border: 'none',
+                                      borderRadius: '6px',
+                                      color: 'white',
+                                      cursor: 'pointer',
+                                      fontWeight: '600',
+                                    }}
+                                  >
+                                    Verify & Complete
+                                  </button>
+                                )}
+                                {/* Fallback: Generic Complete Order button */}
+                                {order.paymentMethod !== 'PAY_NOW' && order.paymentStatus === 'PAID' && (
+                                  <button
+                                    onClick={async () => {
+                                      setError('');
+                                      try {
+                                        await adminCompleteOrder(order._id);
+                                        setOrders(prev => prev.filter(o => o._id !== order._id));
+                                      } catch (err) {
+                                        setError(err?.response?.data?.message || 'Failed to complete order');
+                                      }
+                                    }}
+                                    style={{
+                                      padding: '6px 12px',
+                                      fontSize: '12px',
+                                      background: '#4caf50',
+                                      border: 'none',
+                                      borderRadius: '6px',
+                                      color: 'white',
+                                      cursor: 'pointer',
+                                      fontWeight: '600',
+                                    }}
+                                  >
+                                    Complete Order
+                                  </button>
+                                )}
+                              </div>
                             )}
                             {order.status === 'COMPLETED' && (
                               <span style={{ color: '#999', fontSize: '0.75rem' }}>✓ Completed</span>

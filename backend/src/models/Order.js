@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const { getMenuDB } = require('../config/db');
 
 const itemSchema = new mongoose.Schema({
-  item: { type: mongoose.Schema.Types.ObjectId, ref: 'MenuItem', required: true },
+  item: { type: String, required: true }, // String to handle custom string IDs like 'itm_robusta_iced_americano'
   name: { type: String, required: true },
   price: { type: Number, required: true },
   quantity: { type: Number, required: true, min: 1 },
@@ -17,6 +17,13 @@ const schema = new mongoose.Schema(
       unique: true,
       index: true 
     },
+    orderToken: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+      sparse: true
+    },
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     items: [itemSchema],
     totalAmount: { type: Number, required: true, min: 0 },
@@ -27,9 +34,9 @@ const schema = new mongoose.Schema(
     },
     paymentStatus: { 
       type: String, 
-      enum: ['PAID', 'UNPAID'], 
+      enum: ['PENDING', 'PAID_UNVERIFIED', 'PAID'],
       required: true,
-      default: 'UNPAID'
+      default: 'PENDING'
     },
     pickupTime: { type: Date, required: true },
     status: { 
@@ -52,15 +59,25 @@ schema.pre('save', async function(next) {
       const endOfDay = new Date();
       endOfDay.setHours(23, 59, 59, 999);
       
-      const count = await this.constructor.countDocuments({
-        createdAt: {
-          $gte: startOfDay,
-          $lt: endOfDay
-        }
-      });
+      // Try to count documents with the same day
+      let count = 0;
+      try {
+        count = await this.constructor.countDocuments({
+          createdAt: {
+            $gte: startOfDay,
+            $lt: endOfDay
+          }
+        });
+      } catch (countErr) {
+        console.error('Count error:', countErr.message);
+        count = 0; // Default to 0 if count fails
+      }
+      
       this.orderId = `ORD-${date}-${String(count + 1).padStart(3, '0')}`;
+      console.log(`✅ Generated orderId: ${this.orderId}`);
     } catch (err) {
-      // Fallback order ID if count fails
+      // Fallback order ID if generation fails
+      console.error('OrderId generation error:', err.message);
       this.orderId = `ORD-${Date.now()}`;
     }
   }

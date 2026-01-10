@@ -77,5 +77,7 @@ export const adminGetOrders = (filter) => {
   return api.get('/admin/orders', { params });
 };
 export const adminCompleteOrder = (id) => api.put(`/admin/orders/${id}/complete`);
+export const adminMarkOrderAsPaid = (id) => api.put(`/admin/orders/${id}/mark-paid`);
+export const adminVerifyAndCompleteOrder = (id) => api.put(`/admin/orders/${id}/verify-complete`);
 
 export default api;

@@ -1,7 +1,7 @@
 // backend/src/routes/order.admin.routes.js (ADMIN)
 const express = require('express');
 const { authMiddleware, adminMiddleware } = require('../middleware/authMiddleware');
-const { getOrders, completeOrder } = require('../controllers/orderController');
+const { getOrders, completeOrder, markAsPaid, verifyAndComplete } = require('../controllers/orderController');
 
 const router = express.Router();
 
@@ -13,5 +13,11 @@ router.get('/', getOrders);
 
 // PUT /api/admin/orders/:id/complete - complete order
 router.put('/:id/complete', completeOrder);
+
+// PUT /api/admin/orders/:id/mark-paid - mark PAY_AT_COUNTER order as paid
+router.put('/:id/mark-paid', markAsPaid);
+
+// PUT /api/admin/orders/:id/verify-complete - verify PAY_NOW order and complete it
+router.put('/:id/verify-complete', verifyAndComplete);
 
 module.exports = router;
