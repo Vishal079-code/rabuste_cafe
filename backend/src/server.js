@@ -109,11 +109,39 @@ app.get('/debug/menu-full', async (req, res) => {
     const MenuGroup = getMenuGroupModel();
     const MenuItem = getMenuItemModel();
 
+    const categories = await MenuCategory.find({});
+    const subCategories = await MenuSubCategory.find({});
+    const groups = await MenuGroup.find({});
+    const items = await MenuItem.find({}).select('_id name groupId displayOrder isActive prices categoryId subCategoryId section').lean();
+
+    console.log('📊 DEBUG MENU-FULL:');
+    console.log(`  - Categories: ${categories.length}`);
+    console.log(`  - SubCategories: ${subCategories.length}`);
+    console.log(`  - Groups: ${groups.length}`);
+    console.log(`  - Items: ${items.length}`);
+    if (items.length > 0) {
+      console.log(`  - First item:`, items[0]);
+      console.log(`  - First item keys:`, Object.keys(items[0]));
+    }
+
+    // Ensure all items have _id (fallback to name-based ID if missing)
+    const itemsWithIds = items.map((item, idx) => {
+      if (!item._id && !item.id) {
+        console.warn(`⚠️ Item ${idx} missing ID:`, item.name);
+        return {
+          ...item,
+          _id: item._id || `item_${idx}`,
+          id: item._id || `item_${idx}`,
+        };
+      }
+      return item;
+    });
+
     const data = {
-      categories: await MenuCategory.find({}),
-      subCategories: await MenuSubCategory.find({}),
-      groups: await MenuGroup.find({}),
-      items: await MenuItem.find({}),
+      categories,
+      subCategories,
+      groups,
+      items: itemsWithIds,
     };
 
     res.json(data);

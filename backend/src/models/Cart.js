@@ -3,7 +3,7 @@ const { getMenuDB } = require('../config/db');
 
 const itemSchema = new mongoose.Schema(
   {
-    item: { type: mongoose.Schema.Types.ObjectId, ref: 'MenuItem', required: true },
+    item: { type: String, required: true }, // String to handle custom string IDs like 'itm_robusta_iced_americano'
     quantity: { type: Number, required: true, min: 1, default: 1 },
   },
   { _id: false }

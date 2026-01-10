@@ -99,6 +99,15 @@ const Order = () => {
       try {
         const res = await fetch('http://localhost:5000/debug/menu-full');
         const data = await res.json();
+        
+        console.log('📥 MENU DATA FETCHED:');
+        console.log('  Categories:', data.categories?.length);
+        console.log('  SubCategories:', data.subCategories?.length);
+        console.log('  Items:', data.items?.length);
+        if (data.items?.length > 0) {
+          console.log('  First item:', data.items[0]);
+        }
+        
         setMenuData(data);
         // Set first active category's string ID (e.g., "cat_robusta")
         if (data.categories && data.categories.length > 0) {
@@ -160,6 +169,13 @@ const Order = () => {
         i.categoryId === selectedCategory && // STRING comparison
         i.subCategoryId === subId // STRING comparison
     );
+    
+    // DEBUG: Log first occurrence to see if items have _id
+    if (items.length > 0 && subId === "sub_robusta_cold") {
+      console.log('✨ FILTERED ITEMS FOR', subId, ':', items.length, 'items');
+      console.log('  First item:', items[0]);
+      console.log('  First item._id:', items[0]._id);
+    }
 
     if (!items.length) return null;
 
@@ -192,11 +208,16 @@ const Order = () => {
     return sub?.name || 'Unknown';
   };
 const normalizeCart = (resData) => {
+  console.log('normalizeCart input:', resData); // DEBUG
+  
   const cart =
     resData?.data?.cart ||
     resData?.cart ||
     resData?.data ||
     resData;
+
+  console.log('extracted cart:', cart); // DEBUG
+  console.log('cart items:', cart?.items); // DEBUG
 
   return (cart?.items || []).map(ci => ({
     itemId: typeof ci.item === 'object' ? ci.item._id : ci.item,
@@ -218,10 +239,24 @@ const normalizeCart = (resData) => {
 
   try {
     setError('');
+    
+    // Use item.id (from debug/menu-full) or fallback to _id
+    const itemId = item.id || item._id;
+    console.log('🛒 handleAddToCart called with item:', {
+      name: item.name,
+      id: item.id,
+      _id: item._id,
+      resolved_itemId: itemId
+    });
+
+    if (!itemId) {
+      setError('Invalid item - missing ID');
+      return;
+    }
 
     // ✅ DEFINE res HERE
     const res = await addToCart({
-      itemId: item._id,
+      itemId: itemId,
       quantity: 1
     });
 
@@ -229,7 +264,9 @@ const normalizeCart = (resData) => {
     console.log('ADD TO CART RESPONSE:', res.data);
 
     // ✅ Update cart properly
-    setCart(normalizeCart(res.data));
+    const normalized = normalizeCart(res.data);
+    console.log('Normalized cart:', normalized);
+    setCart(normalized);
 
   } catch (err) {
     console.error('Add to cart error:', err);

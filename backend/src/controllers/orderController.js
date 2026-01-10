@@ -41,7 +41,9 @@ exports.createOrder = async (req, res) => {
       const qty = parseInt(it.quantity, 10) || 0;
       if (qty <= 0) return res.status(400).json({ message: 'Invalid quantity' });
 
-      const menuItem = await MenuItem.findById(it.itemId).lean();
+      // Query with explicit _id comparison to handle string IDs
+      // Bypass Mongoose casting by using collection.findOne()
+      const menuItem = await MenuItem.collection.findOne({ _id: it.itemId });
       if (!menuItem) {
         // skip missing items but continue
         continue;
