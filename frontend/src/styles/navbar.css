@@ -263,4 +263,14 @@
 .handwritten-logo svg {
   overflow: visible;
 }
+.handwritten-logo svg {
+  display: block;
+}
+.handwritten-logo {
+  line-height: 0;
+}
+.handwritten-logo {
+  align-self: center;
+  transform: translateY(-1px);
+}
 

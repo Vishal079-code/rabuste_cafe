@@ -78,7 +78,7 @@ const profileRef = useRef(null);
   return (
     <header className="top-bar">
       <NavLink to="/" className="logo handwritten-logo">
-  <HandwrittenText text="Rabuste" />
+  <HandwrittenText text="Rabuste " />
 </NavLink>
 
 

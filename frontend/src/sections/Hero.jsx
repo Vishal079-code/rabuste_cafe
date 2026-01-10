@@ -16,12 +16,13 @@ const Hero = () => {
         </p>
 
         {/* ✍️ HANDWRITTEN HEADLINE */}
-        <div
-          className="hero-handwritten animate-fade-up"
-          style={{ animationDelay: '0.4s' }}
-        >
-          <HandwrittenText text="Rabuste is a cozy, bold home" />
-        </div>
+        <h1
+  className="hero-title animate-fade-up"
+  style={{ animationDelay: "0.4s" }}
+>
+  Rabuste is a cozy, bold home
+</h1>
+
 
         <p
           className="animate-fade-up"

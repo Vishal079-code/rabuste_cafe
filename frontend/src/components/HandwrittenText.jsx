@@ -16,9 +16,10 @@ const HandwrittenText = ({ text }) => {
       [
         {
           text,
-          y: 60,
+          y: 35,
+          x:5,
           fromCurrentPosition: { y: false },
-          duration: 3500
+          duration: 2000
         }
       ],
       {
