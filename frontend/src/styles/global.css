@@ -994,9 +994,7 @@ a:not(.cta):hover {
 #ai select.input option:checked {
   background-color: rgba(216, 107, 50, 0.6);
   color: #ffffff;
-}
-
-/* Focus state */
+}/* Focus state */
 #ai select.input:focus {
   outline: none;
   border-color: var(--accent-soft);

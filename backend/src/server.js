@@ -48,6 +48,8 @@ const adminRoutes = require('./routes/adminRoutes');
 
 const menuPublicRoutes = require('./routes/menu.public.routes');
 const menuAdminRoutes = require('./routes/menu.admin.routes');
+const orderRoutes = require('./routes/orderRoutes');
+const orderAdminRoutes = require('./routes/order.admin.routes');
 
 // ---------- BASE ----------
 app.get('/', (_req, res) => res.send('Rabuste Coffee API is alive'));
@@ -67,6 +69,10 @@ app.use('/api/admin', adminRoutes);
 // ---------- MENU ----------
 app.use('/api/menu', menuPublicRoutes);
 app.use('/api/admin/menu', menuAdminRoutes);
+
+// ---------- ORDERS ----------
+app.use('/api/orders', orderRoutes);
+app.use('/api/admin/orders', orderAdminRoutes);
 
 // ---------- ERROR HANDLER ----------
 app.use((err, _req, res, _next) => {

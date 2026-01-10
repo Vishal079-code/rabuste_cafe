@@ -21,6 +21,8 @@ import {
   adminGetWorkshopRegistrations,
   adminGetFranchiseEnquiries,
   adminUpdateEnquiryStatus,
+  adminGetOrders,
+  adminCompleteOrder,
 } from '../services/api';
 
 import '../styles/AdminDashboard.css';
@@ -40,6 +42,8 @@ const AdminDashboard = () => {
   const [bookings, setBookings] = useState([]);
   const [workshopRegistrations, setWorkshopRegistrations] = useState([]);
   const [franchiseEnquiries, setFranchiseEnquiries] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [orderFilter, setOrderFilter] = useState('pending'); // 'pending' or 'completed'
   const [loadingItems, setLoadingItems] = useState(false);
   const [error, setError] = useState('');
 
@@ -150,6 +154,19 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchOrders = async (filter = 'pending') => {
+    setLoadingItems(true);
+    setError('');
+    try {
+      const res = await adminGetOrders(filter);
+      setOrders(res.data || []);
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Failed to load orders');
+    } finally {
+      setLoadingItems(false);
+    }
+  };
+
   useEffect(() => {
     if (activeSection === 'menu') fetchMenuItems();
     if (activeSection === 'workshop') fetchWorkshopItems();
@@ -157,7 +174,8 @@ const AdminDashboard = () => {
     if (activeSection === 'bookings') fetchBookings();
     if (activeSection === 'workshop-registrations') fetchWorkshopRegistrations();
     if (activeSection === 'franchise-enquiries') fetchFranchiseEnquiries();
-  }, [activeSection]);
+    if (activeSection === 'orders') fetchOrders(orderFilter);
+  }, [activeSection, orderFilter]);
 
   /* ===== GSAP SIDEBAR ===== */
   
@@ -327,6 +345,7 @@ const AdminDashboard = () => {
         <h4 onClick={() => { setActiveSection('art'); tl.current.reverse(); }}>🎨 Art</h4>
         <h4 onClick={() => { setActiveSection('bookings'); tl.current.reverse(); }}>📋 Art Bookings</h4>
         <h4 onClick={() => { setActiveSection('franchise-enquiries'); tl.current.reverse(); }}>🏢 Franchise Enquiries</h4>
+        <h4 onClick={() => { setActiveSection('orders'); tl.current.reverse(); }}>🛒 Orders</h4>
 
         {/* CLOSE BUTTON AT BOTTOM */}
         <i
@@ -902,6 +921,175 @@ const AdminDashboard = () => {
                                 </button>
                               )}
                             </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {activeSection === 'orders' && (
+          <>
+            <div className="admin-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <h3>Orders ({orders.length})</h3>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button
+                    onClick={() => {
+                      setOrderFilter('pending');
+                      fetchOrders('pending');
+                    }}
+                    style={{
+                      padding: '8px 16px',
+                      fontSize: '14px',
+                      background: orderFilter === 'pending' ? '#d86732' : '#2a2a35',
+                      border: 'none',
+                      borderRadius: '6px',
+                      color: 'white',
+                      cursor: 'pointer',
+                      fontWeight: '600',
+                    }}
+                  >
+                    Pending Orders
+                  </button>
+                  <button
+                    onClick={() => {
+                      setOrderFilter('completed');
+                      fetchOrders('completed');
+                    }}
+                    style={{
+                      padding: '8px 16px',
+                      fontSize: '14px',
+                      background: orderFilter === 'completed' ? '#d86732' : '#2a2a35',
+                      border: 'none',
+                      borderRadius: '6px',
+                      color: 'white',
+                      cursor: 'pointer',
+                      fontWeight: '600',
+                    }}
+                  >
+                    Completed Orders
+                  </button>
+                </div>
+              </div>
+              {loadingItems ? (
+                <p>Loading...</p>
+              ) : orders.length === 0 ? (
+                <p>No {orderFilter} orders yet</p>
+              ) : (
+                <div style={{ marginTop: '20px', overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '2px solid #2a2a35' }}>
+                        <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>Order ID</th>
+                        <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>Items</th>
+                        <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>Total</th>
+                        <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>Payment Method</th>
+                        <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>Payment Status</th>
+                        <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>Pickup Time</th>
+                        <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>Status</th>
+                        <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>Date</th>
+                        <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {orders.map((order) => (
+                        <tr 
+                          key={order._id} 
+                          style={{ 
+                            borderBottom: '1px solid #2a2a35',
+                            transition: 'background 0.2s',
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 122, 24, 0.05)'}
+                          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                        >
+                          <td style={{ padding: '12px', color: '#fff', fontSize: '0.875rem', fontWeight: '600' }}>
+                            {order.orderId}
+                          </td>
+                          <td style={{ padding: '12px', color: '#ccc', fontSize: '0.875rem' }}>
+                            <div style={{ maxWidth: '200px' }}>
+                              {order.items.map((item, idx) => (
+                                <div key={idx} style={{ marginBottom: '4px' }}>
+                                  {item.name} × {item.quantity}
+                                </div>
+                              ))}
+                            </div>
+                          </td>
+                          <td style={{ padding: '12px', color: '#fff', fontSize: '0.875rem', fontWeight: '600' }}>
+                            ₹{order.totalAmount.toFixed(2)}
+                          </td>
+                          <td style={{ padding: '12px', color: '#ccc', fontSize: '0.875rem' }}>
+                            {order.paymentMethod === 'PAY_NOW' ? 'Pay Now' : 'Pay at Counter'}
+                          </td>
+                          <td style={{ padding: '12px' }}>
+                            <span
+                              style={{
+                                padding: '4px 10px',
+                                borderRadius: '6px',
+                                fontSize: '0.75rem',
+                                fontWeight: '600',
+                                background: order.paymentStatus === 'PAID' ? 'rgba(76, 175, 80, 0.2)' : 'rgba(255, 193, 7, 0.2)',
+                                color: order.paymentStatus === 'PAID' ? '#81c784' : '#ffc107',
+                                border: `1px solid ${order.paymentStatus === 'PAID' ? 'rgba(76, 175, 80, 0.4)' : 'rgba(255, 193, 7, 0.4)'}`,
+                              }}
+                            >
+                              {order.paymentStatus}
+                            </span>
+                          </td>
+                          <td style={{ padding: '12px', color: '#ccc', fontSize: '0.875rem' }}>
+                            {new Date(order.pickupTime).toLocaleString()}
+                          </td>
+                          <td style={{ padding: '12px' }}>
+                            <span
+                              style={{
+                                padding: '4px 10px',
+                                borderRadius: '6px',
+                                fontSize: '0.75rem',
+                                fontWeight: '600',
+                                background: order.status === 'COMPLETED' ? 'rgba(76, 175, 80, 0.2)' : 'rgba(255, 193, 7, 0.2)',
+                                color: order.status === 'COMPLETED' ? '#81c784' : '#ffc107',
+                                border: `1px solid ${order.status === 'COMPLETED' ? 'rgba(76, 175, 80, 0.4)' : 'rgba(255, 193, 7, 0.4)'}`,
+                              }}
+                            >
+                              {order.status}
+                            </span>
+                          </td>
+                          <td style={{ padding: '12px', color: '#999', fontSize: '0.75rem' }}>
+                            {new Date(order.createdAt).toLocaleDateString()}
+                          </td>
+                          <td style={{ padding: '12px' }}>
+                            {order.status === 'PENDING' && (
+                              <button
+                                onClick={async () => {
+                                  setError('');
+                                  try {
+                                    await adminCompleteOrder(order._id);
+                                    fetchOrders(orderFilter);
+                                  } catch (err) {
+                                    setError(err?.response?.data?.message || 'Failed to complete order');
+                                  }
+                                }}
+                                style={{
+                                  padding: '6px 12px',
+                                  fontSize: '12px',
+                                  background: '#4caf50',
+                                  border: 'none',
+                                  borderRadius: '6px',
+                                  color: 'white',
+                                  cursor: 'pointer',
+                                  fontWeight: '600',
+                                }}
+                              >
+                                Complete Order
+                              </button>
+                            )}
+                            {order.status === 'COMPLETED' && (
+                              <span style={{ color: '#999', fontSize: '0.75rem' }}>✓ Completed</span>
+                            )}
                           </td>
                         </tr>
                       ))}

@@ -96,6 +96,11 @@ const profileRef = useRef(null);
           <span className="hover-orb" />
         </NavLink>
 
+        <NavLink to="/order" className="nav-button">
+          <span className="nav-text">Order</span>
+          <span className="hover-orb" />
+        </NavLink>
+
         <NavLink to="/art" className="nav-button">
           <span className="nav-text">Art</span>
           <span className="hover-orb" />

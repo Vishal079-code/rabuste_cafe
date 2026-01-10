@@ -64,4 +64,13 @@ export const adminRejectBooking = (id) => api.patch(`/admin/art/bookings/${id}/r
 export const adminGetFranchiseEnquiries = () => api.get('/admin/franchise/enquiries');
 export const adminUpdateEnquiryStatus = (id, status) => api.patch(`/admin/franchise/enquiries/${id}/status`, { status });
 
+/* ================== ORDERS ================== */
+export const createOrder = (payload) => api.post('/orders', payload);
+export const adminGetOrders = (filter) => {
+  const params = {};
+  if (filter) params.filter = filter;
+  return api.get('/admin/orders', { params });
+};
+export const adminCompleteOrder = (id) => api.put(`/admin/orders/${id}/complete`);
+
 export default api;
