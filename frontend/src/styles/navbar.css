@@ -273,4 +273,20 @@
   align-self: center;
   transform: translateY(-1px);
 }
+.nav-letter {
+  display: inline-block;
+}
+.nav-letter {
+  display: inline-block;
+  transition: filter 0.3s ease;
+}
+.nav-letter {
+  display: inline-block;
+  will-change: text-shadow, color;
+}
+.nav-letter {
+  display: inline-block;
+  transition: text-shadow 0.3s ease;
+  will-change: filter, opacity, text-shadow;
+}
 

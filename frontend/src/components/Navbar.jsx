@@ -45,7 +45,7 @@ const profileRef = useRef(null);
           duration: 0.2,
         });
 
-        if (text) gsap.to(text, { color: "#fff", duration: 0.2 });
+        
 
         gsap.to(btn, {
           scale: 1.08,
@@ -69,16 +69,55 @@ const profileRef = useRef(null);
         btn.removeEventListener("mouseleave", leave);
       };
     });
-
+    
     return () => {
       buttons.forEach((btn) => btn._cleanup?.());
     };
   }, [user]);
+ useEffect(() => {
+  const buttons = document.querySelectorAll(".nav-button");
+
+  buttons.forEach((btn) => {
+    const text = btn.querySelector(".nav-text");
+    if (!text || text.dataset.split) return;
+
+    text.dataset.split = "true";
+
+    const letters = text.textContent.split("");
+    text.innerHTML = letters
+      .map(
+        (l) =>
+          `<span class="nav-letter">${l === " " ? "&nbsp;" : l}</span>`
+      )
+      .join("");
+
+    const lettersEls = text.querySelectorAll(".nav-letter");
+
+    btn.addEventListener("mouseenter", () => {
+      gsap.fromTo(
+        lettersEls,
+        {
+          filter: "blur(2px)",
+          opacity: 0.6,
+          textShadow: "0 0 0 rgba(216,107,50,0)",
+        },
+        {
+          filter: "blur(0px)",
+          opacity: 1,
+          textShadow: "0 0 12px rgba(216,107,50,0.6)",
+          duration: 0.45,
+          ease: "power2.out",
+          stagger: 0, // simultaneous
+        }
+      );
+    });
+  });
+}, []);
 
   return (
     <header className="top-bar">
       <NavLink to="/" className="logo handwritten-logo">
-  <HandwrittenText text="Rabuste " />
+  <HandwrittenText text=" Rabuste " />
 </NavLink>
 
 
