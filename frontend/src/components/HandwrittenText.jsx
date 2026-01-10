@@ -12,7 +12,7 @@ const HandwrittenText = ({ text }) => {
 
     new Vara(
       `#${id}`, // ✅ STRING selector (THIS FIXES THE ERROR)
-      "/fonts/shadows-into-light.json",
+      "/fonts/b.json",
       [
         {
           text,

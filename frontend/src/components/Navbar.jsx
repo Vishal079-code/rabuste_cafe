@@ -1,5 +1,6 @@
 import { useEffect, useRef,useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import HandwrittenText from "../components/HandwrittenText";
 
 import { useAuth } from "../context/AuthContext";
 import gsap from "gsap";
@@ -76,9 +77,10 @@ const profileRef = useRef(null);
 
   return (
     <header className="top-bar">
-      <NavLink to="/" className="logo">
-        Rabuste
-      </NavLink>
+      <NavLink to="/" className="logo handwritten-logo">
+  <HandwrittenText text="Rabuste" />
+</NavLink>
+
 
       <nav className="chip-nav" ref={navRootRef}>
         <NavLink to="/" end className="nav-button">
@@ -112,7 +114,7 @@ const profileRef = useRef(null);
         </NavLink>
 
         <NavLink to="/ai-experience" className="nav-button">
-          <span className="nav-text">AI Experience</span>
+          <span className="nav-text">brew.ai</span>
           <span className="hover-orb" />
         </NavLink>
 

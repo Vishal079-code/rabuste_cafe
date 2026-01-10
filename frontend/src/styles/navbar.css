@@ -47,27 +47,27 @@
   position: relative;
   overflow: hidden;
 
-  padding: 14px 28px;
-  min-height: 48px;
+  padding: 10px 20px;       /* ⬅ reduced */
+  min-height: 40px;        /* ⬅ reduced */
 
   display: inline-flex;
   align-items: center;
   justify-content: center;
 
-  border-radius: 50px;
-  border: 2px solid rgba(216, 107, 50, 0.55);
+  border-radius: 40px;     /* slightly tighter */
+  border: 1.5px solid rgba(216, 107, 50, 0.55);
 
   background: rgba(139, 90, 43, 0.22);
   color: #f5efe8;
 
-  font-size: 14px;
+  font-size: 12.5px;       /* ⬅ reduced */
   font-weight: 800;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.6px;  /* ⬅ reduced */
   text-transform: uppercase;
   white-space: nowrap;
   text-decoration: none;
 
-  box-shadow: 0 3px 10px rgba(0,0,0,0.35);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.35);
   cursor: pointer;
 }
 
@@ -75,13 +75,13 @@
 .nav-button.active {
   background: linear-gradient(
     135deg,
-    rgba(216, 107, 50, 0.55),
-    rgba(241, 164, 92, 0.35)
+    rgba(216, 107, 50, 0.5),
+    rgba(241, 164, 92, 0.3)
   );
   border-color: #d86b32;
   box-shadow:
-    0 0 22px rgba(216, 107, 50, 0.6),
-    inset 0 1px 0 rgba(255,255,255,0.15);
+    0 0 16px rgba(216, 107, 50, 0.5),
+    inset 0 1px 0 rgba(255,255,255,0.12);
 }
 
 /* ================= TEXT ================= */
@@ -222,3 +222,45 @@
     transform: translateY(0);
   }
 }
+.hover-orb {
+  width: 120px;     /* ⬅ reduced */
+  height: 120px;
+  filter: blur(18px);
+}
+.profile-btn {
+  width: 40px;     /* ⬅ reduced */
+  height: 40px;
+  border-radius: 50%;
+}
+
+.profile-icon {
+  font-size: 16px;
+}
+.top-bar {
+  padding: 10px 20px;   /* ⬅ reduced */
+}
+@media (max-width: 768px) {
+  .nav-button {
+    padding: 9px 16px;
+    font-size: 12px;
+  }
+}
+/* ================= HANDWRITTEN LOGO ================= */
+.handwritten-logo {
+  display: flex;
+  align-items: center;
+  height: 48px; /* match navbar height */
+}
+
+.handwritten-logo #vara-container {
+  width: 160px;        /* ⬅ control logo width */
+  height: 60px;
+  transform: scale(0.9); /* ⬅ shrink slightly */
+  transform-origin: left center;
+}
+
+/* Prevent hover breaking Vara SVG */
+.handwritten-logo svg {
+  overflow: visible;
+}
+
