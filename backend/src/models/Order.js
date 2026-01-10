@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const { getMenuDB } = require('../config/db');
 
 const itemSchema = new mongoose.Schema({
-  itemId: { type: mongoose.Schema.Types.ObjectId, required: true },
+  item: { type: mongoose.Schema.Types.ObjectId, ref: 'MenuItem', required: true },
   name: { type: String, required: true },
   price: { type: Number, required: true },
   quantity: { type: Number, required: true, min: 1 },
@@ -17,6 +17,7 @@ const schema = new mongoose.Schema(
       unique: true,
       index: true 
     },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     items: [itemSchema],
     totalAmount: { type: Number, required: true, min: 0 },
     paymentMethod: { 
@@ -68,6 +69,7 @@ schema.pre('save', async function(next) {
 
 schema.index({ status: 1, createdAt: -1 });
 schema.index({ orderId: 1 });
+
 
 let OrderModel;
 

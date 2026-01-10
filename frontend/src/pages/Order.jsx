@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { createOrder } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import { createOrder, getCart, addToCart, updateCart, removeFromCart, clearCart } from '../services/api';
 import '../styles/Order.css';
-
 // Category ID mapping (matching MenuViewer)
 const CATEGORY_ID_MAP = {
   "Robusta Speciality Coffee": "cat_robusta",
@@ -10,7 +10,9 @@ const CATEGORY_ID_MAP = {
   "Non Coffee Drinks": "cat_noncoffee",
   "Savoury": "cat_food"
 };
-
+function getItemKey(item) {
+  return `${item.categoryId}|${item.subCategoryId}|${item.section || "GENERAL"}|${item.name}`;
+}
 // Helper functions from MenuViewer
 function buildSubCategoryId(categoryId, subName) {
   const clean = subName.toLowerCase().replace(/\s+/g, "_");
@@ -55,12 +57,41 @@ const Order = () => {
   const [error, setError] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedSubCategory, setSelectedSubCategory] = useState('');
+  const { user } = useAuth();
   const [cart, setCart] = useState([]);
   const [pickupTime, setPickupTime] = useState('');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [orderSubmitted, setOrderSubmitted] = useState(false);
   const [orderConfirmation, setOrderConfirmation] = useState(null);
+  useEffect(() => {
+  if (!user) {
+    setCart([]);
+    return;
+  }
+
+  const loadCart = async () => {
+    try {
+      const res = await getCart();
+      const data = res.data.data;
+
+      const mapped = (data.items || []).map(ci => ({
+        itemId: typeof ci.item === 'object' ? ci.item._id : ci.item,
+        name: typeof ci.item === 'object' ? ci.item.name : ci.name,
+        price: typeof ci.item === 'object'
+          ? ci.item.prices?.[0]?.price || 0
+          : ci.price || 0,
+        quantity: ci.quantity
+      }));
+
+      setCart(mapped);
+    } catch (err) {
+      console.error('Failed to load cart', err);
+    }
+  };
+
+  loadCart();
+}, [user]);
 
   // Fetch menu data
   useEffect(() => {
@@ -160,79 +191,121 @@ const Order = () => {
     const sub = menuData.subCategories.find(s => (s._id || s.id) === subCategoryId);
     return sub?.name || 'Unknown';
   };
+const normalizeCart = (resData) => {
+  const cart =
+    resData?.data?.cart ||
+    resData?.cart ||
+    resData?.data ||
+    resData;
 
-  // Add item to cart (create shallow copy - NEVER mutate menu items)
-  const handleAddToCart = (item) => {
-    const { final } = getFinalPrice(item);
-    if (!final || final === null || final === undefined) {
-      setError('Item price not available');
-      return;
-    }
+  return (cart?.items || []).map(ci => ({
+    itemId: typeof ci.item === 'object' ? ci.item._id : ci.item,
+    name: typeof ci.item === 'object' ? ci.item.name : ci.name,
+    price:
+      typeof ci.item === 'object'
+        ? ci.item.prices?.[0]?.price || 0
+        : ci.price || 0,
+    quantity: ci.quantity
+  }));
+};
 
-    // EXACT MenuViewer stock check (line 244-246)
-    const inStock = item.inStock !== false;
-    
-    if (!inStock) {
-      setError('Item is out of stock');
-      return;
-    }
+  // Add item to cart (persisted)
+  const handleAddToCart = async (item) => {
+  if (!user) {
+    setError('Please login to order');
+    return;
+  }
 
-    // Use item.id (MenuViewer key) or fallback to _id
-    const itemId = item.id || item._id;
-    if (!itemId) {
-      setError('Invalid item');
-      return;
-    }
+  try {
+    setError('');
 
-    const existingItem = cart.find(c => {
-      // Compare by ObjectId string representation or direct equality
-      const cartItemId = String(c.itemId);
-      const currentItemId = String(itemId);
-      return cartItemId === currentItemId;
+    // ✅ DEFINE res HERE
+    const res = await addToCart({
+      itemId: item._id,
+      quantity: 1
     });
 
-    if (existingItem) {
-      setCart(cart.map(c => {
-        const cartItemId = String(c.itemId);
-        const currentItemId = String(itemId);
-        if (cartItemId === currentItemId) {
-          return { ...c, quantity: c.quantity + 1 };
-        }
-        return c;
-      }));
-    } else {
-      // Create shallow copy - NEVER mutate menu items
-      setCart([
-        ...cart,
-        {
-          itemId, // Store ObjectId as-is for backend
-          name: item.name,
-          price: final,
-          quantity: 1,
-        },
-      ]);
+    // ✅ DEBUG LOG (now valid)
+    console.log('ADD TO CART RESPONSE:', res.data);
+
+    // ✅ Update cart properly
+    setCart(normalizeCart(res.data));
+
+  } catch (err) {
+    console.error('Add to cart error:', err);
+    setError(err?.response?.data?.message || 'Failed to add to cart');
+  }
+};
+
+  {/*const handleAddToCart = async (item) => {
+    if (!user) {
+      setError('Please login to order');
+      return;
     }
-    setError('');
-  };
+    const itemId = item.id || item._id;
+    if (!itemId) return setError('Invalid item');
+    try {
+      setError('');
+      const res = await addToCart({ itemId, quantity: 1 });
+      const data = res.data.data;
+      // Map backend cart format to frontend cart shape
+      const mapped = (data.items || []).map(ci => {
+        const menu = ci.item || {};
+        const price = menu.prices && menu.prices[0] ? menu.prices[0].price : 0;
+        return { itemId: menu._id || ci.item, name: menu.name || ci.name, price, quantity: ci.quantity };
+      });
+      setCart(mapped);
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Failed to add to cart');
+    }
+  };*/}
 
   // Update cart item quantity
-  const updateQuantity = (itemId, delta) => {
-    setCart(cart.map(item => {
-      const cartItemId = String(item.itemId);
-      const targetId = String(itemId);
-      if (cartItemId === targetId) {
-        const newQuantity = item.quantity + delta;
-        if (newQuantity <= 0) return null;
-        return { ...item, quantity: newQuantity };
+  const updateQuantity = async (itemId, delta) => {
+    if (!user) return setError('Please login to order');
+    try {
+      const existing = cart.find(c => String(c.itemId) === String(itemId));
+      if (!existing) return;
+      const newQty = existing.quantity + delta;
+      if (newQty <= 0) {
+        const res = await updateCart({ itemId, quantity: 0 });
+        const data = res.data.data;
+        const mapped = (data.items || []).map(ci => {
+          const menu = ci.item || {};
+          const price = menu.prices && menu.prices[0] ? menu.prices[0].price : 0;
+          return { itemId: menu._id || ci.item, name: menu.name || ci.name, price, quantity: ci.quantity };
+        });
+        setCart(mapped);
+        return;
       }
-      return item;
-    }).filter(Boolean));
+      const res = await updateCart({ itemId, quantity: newQty });
+      const data = res.data.data;
+      const mapped = (data.items || []).map(ci => {
+        const menu = ci.item || {};
+        const price = menu.prices && menu.prices[0] ? menu.prices[0].price : 0;
+        return { itemId: menu._id || ci.item, name: menu.name || ci.name, price, quantity: ci.quantity };
+      });
+      setCart(mapped);
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Failed to update cart');
+    }
   };
 
   // Remove item from cart
-  const removeFromCart = (itemId) => {
-    const targetId = String(itemId);
-    setCart(cart.filter(item => String(item.itemId) !== targetId));
+  const handleRemoveFromCart = async (itemId) => {
+    if (!user) return setError('Please login to order');
+    try {
+      const res = await removeFromCart(itemId);
+      const data = res.data.data;
+      const mapped = (data.items || []).map(ci => {
+        const menu = ci.item || {};
+        const price = menu.prices && menu.prices[0] ? menu.prices[0].price : 0;
+        return { itemId: menu._id || ci.item, name: menu.name || ci.name, price, quantity: ci.quantity };
+      });
+      setCart(mapped);
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Failed to remove item');
+    }
   };
 
   // Calculate total
@@ -259,8 +332,6 @@ const Order = () => {
       const orderData = {
         items: cart.map(item => ({
           itemId: item.itemId,
-          name: item.name,
-          price: item.price,
           quantity: item.quantity,
         })),
         paymentMethod,
@@ -273,6 +344,7 @@ const Order = () => {
       setShowPaymentModal(false);
       setCart([]);
       setPickupTime('');
+      await clearCart().catch(() => {});
     } catch (err) {
       setError(err?.response?.data?.message || 'Failed to place order. Please try again.');
       console.error(err);
@@ -407,9 +479,9 @@ const Order = () => {
                                   const inStock = item.inStock !== false;
                                   // EXACT MenuViewer key (line 229: item.id) - prefer item.id
                                   const itemId = item.id || item._id;
-                                  if (!itemId) {
-                                    console.warn('Item missing id:', item);
-                                  }
+                                  //if (!itemId) {
+                                  //  console.warn('Item missing id:', item);
+                                  //}
                                   // Composite key as specified: categoryId|subId|section|itemId
                                   // Use item.id (MenuViewer style) or fallback to _id, then to index-based key
                                   const compositeKey = itemId 
@@ -433,7 +505,7 @@ const Order = () => {
                                           </span>
                                         </div>
                                       </div>
-                                      <button
+                                      {/*<button
                                         onClick={() => handleAddToCart(item)}
                                         disabled={!inStock || final === undefined || final === null || item.isActive === false}
                                         className="btn-add-cart"
@@ -442,7 +514,15 @@ const Order = () => {
                                         }}
                                       >
                                         Add to Cart
-                                      </button>
+                                      </button>*/}
+                                      <button
+  onClick={() => handleAddToCart(item)}
+  disabled={!user || !inStock || item.isActive === false}
+  className="btn-add-cart"
+>
+  {!user ? 'Login to Order' : 'Add to Cart'}
+</button>
+
                                     </div>
                                   );
                                 })}
@@ -494,7 +574,7 @@ const Order = () => {
                         +
                       </button>
                       <button
-                        onClick={() => removeFromCart(item.itemId)}
+                        onClick={() => handleRemoveFromCart(item.itemId)}
                         className="btn-remove"
                       >
                         Remove

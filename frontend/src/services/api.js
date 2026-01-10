@@ -66,6 +66,11 @@ export const adminUpdateEnquiryStatus = (id, status) => api.patch(`/admin/franch
 
 /* ================== ORDERS ================== */
 export const createOrder = (payload) => api.post('/orders', payload);
+export const getCart = () => api.get('/cart');
+export const addToCart = (payload) => api.post('/cart/add', payload);
+export const updateCart = (payload) => api.patch('/cart/update', payload);
+export const removeFromCart = (itemId) => api.delete(`/cart/remove/${itemId}`);
+export const clearCart = () => api.delete('/cart/clear');
 export const adminGetOrders = (filter) => {
   const params = {};
   if (filter) params.filter = filter;

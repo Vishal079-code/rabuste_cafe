@@ -5,8 +5,13 @@ const getOrderModel = require('../models/Order');
 exports.createOrder = async (req, res) => {
   try {
     const Order = getOrderModel();
-    
+    const MenuItem = require('../models/MenuItem')();
+
     const { items, paymentMethod, pickupTime } = req.body;
+
+    // Auth required
+    const user = req.user;
+    if (!user) return res.status(401).json({ message: 'Authentication required' });
 
     // Validate required fields
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -27,17 +32,38 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({ message: 'Pickup time must be in the future' });
     }
 
-    // Calculate total amount
-    const totalAmount = items.reduce((sum, item) => {
-      return sum + (item.price * item.quantity);
-    }, 0);
+    // items expected: [{ itemId, quantity }]
+    const populatedItems = [];
+    let totalAmount = 0;
+
+    for (const it of items) {
+      if (!it.itemId) return res.status(400).json({ message: 'Invalid item in payload' });
+      const qty = parseInt(it.quantity, 10) || 0;
+      if (qty <= 0) return res.status(400).json({ message: 'Invalid quantity' });
+
+      const menuItem = await MenuItem.findById(it.itemId).lean();
+      if (!menuItem) {
+        // skip missing items but continue
+        continue;
+      }
+
+      // derive price (take first price entry)
+      const price = menuItem.prices && menuItem.prices[0] ? menuItem.prices[0].price : 0;
+      const name = menuItem.name || 'Unknown Item';
+
+      populatedItems.push({ item: menuItem._id, name, price, quantity: qty });
+      totalAmount += price * qty;
+    }
+
+    if (populatedItems.length === 0) return res.status(400).json({ message: 'No valid items in cart' });
 
     // Determine payment status based on payment method
-    const paymentStatus = paymentMethod === 'PAY_NOW' ? 'PAID' : 'UNPAID';
+    const paymentStatus = paymentMethod === 'PAY_NOW' ? 'PAID' : 'PENDING';
 
     // Create order
     const order = new Order({
-      items,
+      user: user._id,
+      items: populatedItems,
       totalAmount,
       paymentMethod,
       paymentStatus,
@@ -46,6 +72,11 @@ exports.createOrder = async (req, res) => {
     });
 
     await order.save();
+
+    // Clear user's cart
+    const getCartModel = require('../models/Cart');
+    const Cart = getCartModel();
+    await Cart.findOneAndUpdate({ user: user._id }, { $set: { items: [] } });
 
     res.status(201).json({
       message: 'Order created successfully',
@@ -82,6 +113,7 @@ exports.getOrders = async (req, res) => {
 
     const orders = await Order.find(query)
       .sort({ createdAt: -1 })
+      .populate('user', 'name email')
       .lean();
 
     res.json({ data: orders });

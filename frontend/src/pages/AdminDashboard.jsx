@@ -980,12 +980,15 @@ const AdminDashboard = () => {
                 <p>Loading...</p>
               ) : orders.length === 0 ? (
                 <p>No {orderFilter} orders yet</p>
+              ) : !Array.isArray(orders) ? (
+                <p>Error: Invalid orders data</p>
               ) : (
                 <div style={{ marginTop: '20px', overflowX: 'auto' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                       <tr style={{ borderBottom: '2px solid #2a2a35' }}>
                         <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>Order ID</th>
+                        <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>User</th>
                         <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>Items</th>
                         <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>Total</th>
                         <th style={{ padding: '12px', textAlign: 'left', color: '#ccc', fontSize: '0.875rem', fontWeight: '600' }}>Payment Method</th>
@@ -1011,9 +1014,12 @@ const AdminDashboard = () => {
                             {order.orderId}
                           </td>
                           <td style={{ padding: '12px', color: '#ccc', fontSize: '0.875rem' }}>
+                            {order.user?.name || order.user?.email || 'Unknown'}
+                          </td>
+                          <td style={{ padding: '12px', color: '#ccc', fontSize: '0.875rem' }}>
                             <div style={{ maxWidth: '200px' }}>
-                              {order.items.map((item, idx) => (
-                                <div key={idx} style={{ marginBottom: '4px' }}>
+                              {Array.isArray(order.items) && order.items.map((item) => (
+                                <div key={item.name} style={{ marginBottom: '4px' }}>
                                   {item.name} × {item.quantity}
                                 </div>
                               ))}
@@ -1068,7 +1074,7 @@ const AdminDashboard = () => {
                                   setError('');
                                   try {
                                     await adminCompleteOrder(order._id);
-                                    fetchOrders(orderFilter);
+                                    setOrders(prev => prev.filter(o => o._id !== order._id));
                                   } catch (err) {
                                     setError(err?.response?.data?.message || 'Failed to complete order');
                                   }
