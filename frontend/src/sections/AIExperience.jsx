@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { explainableArt, explainableCoffee, explainableWorkshop } from '../utils/aiLogic';
+import { useNavigate } from 'react-router-dom';
+import { explainableCoffee } from '../utils/aiLogic';
+import '../styles/AIExperience.css';
 
-const AIExperience = ({ art, workshops }) => {
+const AIExperience = () => {
+  const navigate = useNavigate();
   const [mood, setMood] = useState('cozy');
   const [timeOfDay, setTimeOfDay] = useState('morning');
   const [prefersMilk, setPrefersMilk] = useState(false);
   const [aiResult, setAiResult] = useState(null);
-  const [artResult, setArtResult] = useState(null);
-  const [workshopResult, setWorkshopResult] = useState(null);
 
   const moodOptions = ['cozy', 'calm', 'creative', 'bold', 'focused', 'energetic'];
   const timeOptions = ['morning', 'afternoon', 'evening', 'night'];
@@ -18,106 +19,100 @@ const AIExperience = ({ art, workshops }) => {
     setAiResult(local);
   };
 
-  const runArtAI = () => {
-    const local = explainableArt({ mood });
-    setArtResult({ local });
-  };
-
-  const runWorkshopAI = () => {
-    const local = explainableWorkshop({ mood, timeOfDay });
-    setWorkshopResult({ local });
+  const handleChatbotClick = () => {
+    navigate('/chat');
   };
 
   return (
-    <section id="ai">
-      <p className="section-kicker">AI Experience Layer</p>
-      <h2 className="section-title">Menu-based intelligent pairing</h2>
+    <section id="ai-experience">
+      <div className="ai-container">
+        {/* HEADING & INTRO */}
+        <div className="ai-header">
+          <h2 className="ai-main-title">Enjoy Coffee According to Your Mood</h2>
+          <p className="ai-intro-text">
+            Tell us how you're feeling right now. Our AI-powered brew assistant will suggest the perfect coffee 
+            that matches your mood, time of day, and preferences. Discover your next favorite cup.
+          </p>
+        </div>
 
-      <div className="grid three">
-        {/* COFFEE */}
-        <div className="card">
-          <div className="section-header">
-            <h3>Coffee discovery</h3>
-            <span className="pill">Mood + time → drink</span>
+        {/* COFFEE SUGGESTION SECTION */}
+        <div className="coffee-suggestion-card">
+          <div className="coffee-header">
+            <h3>Coffee Discovery</h3>
+            <span className="coffee-badge">AI Powered</span>
           </div>
 
-          <form className="grid" onSubmit={runCoffeeAI}>
-            <select className="input" value={mood} onChange={(e) => setMood(e.target.value)}>
-              {moodOptions.map((m) => (
-                <option key={m} value={m}>{m}</option>
-              ))}
-            </select>
+          <form className="coffee-form" onSubmit={runCoffeeAI}>
+            <div className="form-group">
+              <label htmlFor="mood-select">How are you feeling?</label>
+              <select 
+                id="mood-select"
+                className="form-input mood-select" 
+                value={mood} 
+                onChange={(e) => setMood(e.target.value)}
+              >
+                {moodOptions.map((m) => (
+                  <option key={m} value={m}>{m.charAt(0).toUpperCase() + m.slice(1)}</option>
+                ))}
+              </select>
+            </div>
 
-            <select className="input" value={timeOfDay} onChange={(e) => setTimeOfDay(e.target.value)}>
-              {timeOptions.map((t) => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
+            <div className="form-group">
+              <label htmlFor="time-select">What time of day?</label>
+              <select 
+                id="time-select"
+                className="form-input time-select" 
+                value={timeOfDay} 
+                onChange={(e) => setTimeOfDay(e.target.value)}
+              >
+                {timeOptions.map((t) => (
+                  <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>
+                ))}
+              </select>
+            </div>
 
-            <label className="flex" style={{ alignItems: 'center' }}>
-              <input
-                type="checkbox"
-                checked={prefersMilk}
-                onChange={(e) => setPrefersMilk(e.target.checked)}
-              />
-              <span className="muted">Milk-based</span>
-            </label>
+            <div className="form-group checkbox-group">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={prefersMilk}
+                  onChange={(e) => setPrefersMilk(e.target.checked)}
+                  className="checkbox-input"
+                />
+                <span>I prefer milk-based coffee</span>
+              </label>
+            </div>
 
-            <button className="cta" type="submit">Suggest coffee</button>
+            <button className="suggest-btn" type="submit">Get Coffee Suggestion</button>
           </form>
 
           {aiResult && (
-            <div className="blur-panel" style={{ marginTop: 12 }}>
-              <strong>{aiResult.title}</strong>
-              <p className="muted">{aiResult.reasoning}</p>
+            <div className="coffee-result">
+              <h4 className="result-title">{aiResult.title}</h4>
+              <p className="result-reasoning">{aiResult.reasoning}</p>
 
-              <div className="flex">
+              <div className="result-tags">
                 {aiResult.matches.map((c) => (
-                  <span key={c.name} className="tag">{c.name}</span>
+                  <span key={c.name} className="coffee-tag">{c.name}</span>
                 ))}
               </div>
             </div>
           )}
         </div>
 
-        {/* ART (UNCHANGED) */}
-        <div className="card">
-          <div className="section-header">
-            <h3>Art discovery</h3>
-            <span className="pill">Mood → palette</span>
+        {/* CHATBOT PROMOTION SECTION */}
+        <div className="chatbot-promotion">
+          <div className="chatbot-content">
+            <h3 className="chatbot-title">Interactive Brew Assistant</h3>
+            <p className="chatbot-description">
+              Want to chat with our AI assistant? Ask anything about our menu, get personalized recommendations, 
+              learn about our coffee origins, explore café info, or just have a friendly conversation about 
+              your perfect brew.
+            </p>
+            <button className="interact-btn" onClick={handleChatbotClick}>
+              Interact Now
+            </button>
           </div>
-
-          <select className="input" value={mood} onChange={(e) => setMood(e.target.value)}>
-            {moodOptions.map((m) => (
-              <option key={m} value={m}>{m}</option>
-            ))}
-          </select>
-
-          <button className="cta" onClick={runArtAI}>Recommend art</button>
-
-          {artResult && (
-            <div className="blur-panel" style={{ marginTop: 12 }}>
-              <strong>{artResult.local.title}</strong>
-              <p className="muted">{artResult.local.reasoning}</p>
-            </div>
-          )}
-        </div>
-
-        {/* WORKSHOP (UNCHANGED) */}
-        <div className="card">
-          <div className="section-header">
-            <h3>Workshop fit</h3>
-            <span className="pill">Vibe → session</span>
-          </div>
-
-          <button className="cta" onClick={runWorkshopAI}>Suggest workshop</button>
-
-          {workshopResult && (
-            <div className="blur-panel" style={{ marginTop: 12 }}>
-              <strong>{workshopResult.local.title}</strong>
-              <p className="muted">{workshopResult.local.reasoning}</p>
-            </div>
-          )}
         </div>
       </div>
     </section>
