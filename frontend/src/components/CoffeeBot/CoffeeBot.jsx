@@ -160,9 +160,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./CoffeeBot.css";
 import ReactMarkdown from "react-markdown";
+import { useCoffeeBot } from "../../context/CoffeeBotContext";
 
 const CoffeeBot = () => {
-  const [open, setOpen] = useState(false);
+  const { isOpen: open, toggleCoffeeBot, closeCoffeeBot } = useCoffeeBot();
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([
     {
@@ -262,7 +263,7 @@ const CoffeeBot = () => {
   return (
     <>
       {/* Floating Button */}
-      <div className="coffee-bot-btn" onClick={() => setOpen(!open)}>
+      <div className="coffee-bot-btn" onClick={toggleCoffeeBot}>
         ☕
       </div>
 
@@ -271,7 +272,7 @@ const CoffeeBot = () => {
         <div className="coffee-bot-window">
           <div className="coffee-bot-header">
             Coffee Buddy ☕
-            <span onClick={() => setOpen(false)}>✖</span>
+            <span onClick={closeCoffeeBot}>✖</span>
           </div>
 
           <div className="coffee-bot-body">

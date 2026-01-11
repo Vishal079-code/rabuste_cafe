@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useCoffeeBot } from '../context/CoffeeBotContext';
 import { explainableCoffee } from '../utils/aiLogic';
 import '../styles/AIExperience.css';
 
 const AIExperience = () => {
-  const navigate = useNavigate();
+  const { openCoffeeBot } = useCoffeeBot();
   const [mood, setMood] = useState('cozy');
   const [timeOfDay, setTimeOfDay] = useState('morning');
   const [prefersMilk, setPrefersMilk] = useState(false);
@@ -20,7 +20,7 @@ const AIExperience = () => {
   };
 
   const handleChatbotClick = () => {
-    navigate('/chat');
+    openCoffeeBot();
   };
 
   return (
