@@ -239,19 +239,7 @@ function MenuContent({ data, categoryId }) {
                                 </span>
 
                                 <div className="entry-tags">
-                                  <span
-                                    className={
-                                      item.inStock
-                                        ? "tag-in"
-                                        : "tag-out"
-                                    }
-                                  >
-                                    {item.inStock
-                                      ? "IN STOCK"
-                                      : "OUT OF STOCK"}
-                                  </span>
-
-                                  {label && (
+                                 {label && (
                                     <span className="tag-promo">
                                       {label}
                                     </span>
