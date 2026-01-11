@@ -66,17 +66,25 @@ const Order = () => {
   const [orderConfirmation, setOrderConfirmation] = useState(null);
   const [currentOrder, setCurrentOrder] = useState(null);
 
-  // Load current order from localStorage on mount
+  // Load current order from localStorage per-user
   useEffect(() => {
-    const savedOrder = localStorage.getItem('currentOrder');
-    if (savedOrder) {
+    const storageKey = user ? `currentOrder_${user._id || user.id || user.email}` : null;
+    if (!storageKey) {
+      setCurrentOrder(null);
+      return;
+    }
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
       try {
-        setCurrentOrder(JSON.parse(savedOrder));
+        setCurrentOrder(JSON.parse(saved));
       } catch (err) {
         console.error('Failed to load current order:', err);
+        setCurrentOrder(null);
       }
+    } else {
+      setCurrentOrder(null);
     }
-  }, []);
+  }, [user]);
   useEffect(() => {
   if (!user) {
     setCart([]);
@@ -319,23 +327,13 @@ const normalizeCart = (resData) => {
       const newQty = existing.quantity + delta;
       if (newQty <= 0) {
         const res = await updateCart({ itemId, quantity: 0 });
-        const data = res.data.data;
-        const mapped = (data.items || []).map(ci => {
-          const menu = ci.item || {};
-          const price = menu.prices && menu.prices[0] ? menu.prices[0].price : 0;
-          return { itemId: menu._id || ci.item, name: menu.name || ci.name, price, quantity: ci.quantity };
-        });
-        setCart(mapped);
+        const normalized = normalizeCart(res.data);
+        setCart(normalized);
         return;
       }
       const res = await updateCart({ itemId, quantity: newQty });
-      const data = res.data.data;
-      const mapped = (data.items || []).map(ci => {
-        const menu = ci.item || {};
-        const price = menu.prices && menu.prices[0] ? menu.prices[0].price : 0;
-        return { itemId: menu._id || ci.item, name: menu.name || ci.name, price, quantity: ci.quantity };
-      });
-      setCart(mapped);
+      const normalized = normalizeCart(res.data);
+      setCart(normalized);
     } catch (err) {
       setError(err?.response?.data?.message || 'Failed to update cart');
     }
@@ -346,13 +344,8 @@ const normalizeCart = (resData) => {
     if (!user) return setError('Please login to order');
     try {
       const res = await removeFromCart(itemId);
-      const data = res.data.data;
-      const mapped = (data.items || []).map(ci => {
-        const menu = ci.item || {};
-        const price = menu.prices && menu.prices[0] ? menu.prices[0].price : 0;
-        return { itemId: menu._id || ci.item, name: menu.name || ci.name, price, quantity: ci.quantity };
-      });
-      setCart(mapped);
+      const normalized = normalizeCart(res.data);
+      setCart(normalized);
     } catch (err) {
       setError(err?.response?.data?.message || 'Failed to remove item');
     }
@@ -404,9 +397,14 @@ const normalizeCart = (resData) => {
         return;
       }
       
-      // Save order to localStorage for persistence
-      localStorage.setItem('currentOrder', JSON.stringify(res.data.order));
-      
+      // Save order to localStorage for persistence (per-user key)
+      try {
+        const storageKey = user ? `currentOrder_${user._id || user.id || user.email}` : 'currentOrder_guest';
+        localStorage.setItem(storageKey, JSON.stringify(res.data.order));
+      } catch (err) {
+        console.error('Failed to save current order to localStorage', err);
+      }
+
       setOrderConfirmation(res.data.order);
       setCurrentOrder(res.data.order);
       setOrderSubmitted(true);
@@ -739,7 +737,12 @@ const normalizeCart = (resData) => {
               <button
                 onClick={() => {
                   setCurrentOrder(null);
-                  localStorage.removeItem('currentOrder');
+                  try {
+                    const storageKey = user ? `currentOrder_${user._id || user.id || user.email}` : 'currentOrder_guest';
+                    localStorage.removeItem(storageKey);
+                  } catch (err) {
+                    console.error('Failed to remove current order from localStorage', err);
+                  }
                 }}
                 style={{
                   marginTop: '15px',
