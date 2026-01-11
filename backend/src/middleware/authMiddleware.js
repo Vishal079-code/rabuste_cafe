@@ -24,6 +24,12 @@ const authMiddleware = async (req, res, next) => {
 
 // Require admin role
 const adminMiddleware = (req, res, next) => {
+  console.log('🔐 Admin middleware check:', {
+    hasUser: !!req.user,
+    userRole: req.user?.role,
+    isAdmin: req.user?.role === 'admin'
+  });
+  
   if (!req.user || req.user.role !== 'admin') {
     return res.status(403).json({ message: 'Admin access required' });
   }

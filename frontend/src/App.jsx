@@ -10,6 +10,7 @@ import AdminMenu from './pages/AdminMenu';
 import HomePage from './pages/HomePage';
 import WhyRobustaPage from './pages/WhyRobustaPage';
 import MenuPage from './pages/MenuPage';
+import OrderPage from './pages/Order';
 import ArtPage from './pages/ArtPage';
 import WorkshopsPage from './pages/WorkshopsPage';
 import FranchisePage from './pages/FranchisePage';
@@ -32,6 +33,7 @@ const App = () => {
           <Route path="/" element={<HomePage />} />
           <Route path="/why-robusta" element={<WhyRobustaPage />} />
           <Route path="/menu" element={<MenuPage />} />
+          <Route path="/order" element={<OrderPage />} />
           <Route path="/art" element={<ArtPage />} />
           <Route path="/workshops" element={<WorkshopsPage />} />
           <Route path="/franchise" element={<FranchisePage />} />
