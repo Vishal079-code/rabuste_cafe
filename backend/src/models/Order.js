@@ -12,8 +12,10 @@ const itemSchema = new mongoose.Schema({
 const schema = new mongoose.Schema(
   {
     orderId: { 
-      type: String, 
-      required: true, 
+      type: String,
+      // Don't require upfront - pre-save hook will set it
+      // required: true,
+      sparse: true,
       unique: true,
       index: true 
     },
@@ -51,15 +53,15 @@ const schema = new mongoose.Schema(
 
 // Generate readable order ID (e.g., ORD-20240115-001)
 schema.pre('save', async function(next) {
-  if (!this.orderId) {
-    try {
+  try {
+    if (!this.orderId) {
+      console.log('📝 Generating orderId...');
       const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
       const startOfDay = new Date();
       startOfDay.setHours(0, 0, 0, 0);
       const endOfDay = new Date();
       endOfDay.setHours(23, 59, 59, 999);
       
-      // Try to count documents with the same day
       let count = 0;
       try {
         count = await this.constructor.countDocuments({
@@ -68,20 +70,33 @@ schema.pre('save', async function(next) {
             $lt: endOfDay
           }
         });
+        console.log(`📊 Orders today: ${count}`);
       } catch (countErr) {
-        console.error('Count error:', countErr.message);
-        count = 0; // Default to 0 if count fails
+        console.error('❌ Count error:', countErr.message);
+        count = 0;
       }
       
       this.orderId = `ORD-${date}-${String(count + 1).padStart(3, '0')}`;
       console.log(`✅ Generated orderId: ${this.orderId}`);
-    } catch (err) {
-      // Fallback order ID if generation fails
-      console.error('OrderId generation error:', err.message);
+    }
+    
+    // Validate orderId is set before proceeding
+    if (!this.orderId) {
+      throw new Error('Failed to generate orderId');
+    }
+    
+    next();
+  } catch (err) {
+    console.error('❌ Pre-save error:', err.message);
+    // Try fallback
+    try {
       this.orderId = `ORD-${Date.now()}`;
+      console.log(`⚠️ Using fallback orderId: ${this.orderId}`);
+      next();
+    } catch (fallbackErr) {
+      next(fallbackErr);
     }
   }
-  next();
 });
 
 schema.index({ status: 1, createdAt: -1 });

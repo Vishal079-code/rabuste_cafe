@@ -64,6 +64,19 @@ const Order = () => {
   const [submitting, setSubmitting] = useState(false);
   const [orderSubmitted, setOrderSubmitted] = useState(false);
   const [orderConfirmation, setOrderConfirmation] = useState(null);
+  const [currentOrder, setCurrentOrder] = useState(null);
+
+  // Load current order from localStorage on mount
+  useEffect(() => {
+    const savedOrder = localStorage.getItem('currentOrder');
+    if (savedOrder) {
+      try {
+        setCurrentOrder(JSON.parse(savedOrder));
+      } catch (err) {
+        console.error('Failed to load current order:', err);
+      }
+    }
+  }, []);
   useEffect(() => {
   if (!user) {
     setCart([]);
@@ -375,16 +388,35 @@ const normalizeCart = (resData) => {
         pickupTime: pickupDate.toISOString(),
       };
 
+      console.log('📦 Sending order data:', orderData);
       const res = await createOrder(orderData);
+      console.log('✅ Order response:', res.data);
+      
+      if (!res.data.order) {
+        console.error('❌ No order in response:', res.data);
+        setError('Order created but response is invalid. Please contact support.');
+        return;
+      }
+      
+      if (!res.data.order.orderId && !res.data.order.orderToken) {
+        console.error('❌ Order missing both orderId and orderToken:', res.data.order);
+        setError('Order created but missing ID. Please refresh or contact support.');
+        return;
+      }
+      
+      // Save order to localStorage for persistence
+      localStorage.setItem('currentOrder', JSON.stringify(res.data.order));
+      
       setOrderConfirmation(res.data.order);
+      setCurrentOrder(res.data.order);
       setOrderSubmitted(true);
       setShowPaymentModal(false);
       setCart([]);
       setPickupTime('');
       await clearCart().catch(() => {});
     } catch (err) {
+      console.error('❌ Order creation error:', err);
       setError(err?.response?.data?.message || 'Failed to place order. Please try again.');
-      console.error(err);
     } finally {
       setSubmitting(false);
     }
@@ -409,13 +441,37 @@ const normalizeCart = (resData) => {
     return (
       <div className="order-page">
         <div className="order-confirmation">
-          <h2>Order Placed Successfully!</h2>
+          <h2>✅ Order Placed Successfully!</h2>
           <div className="confirmation-details">
-            <p><strong>Order ID:</strong> {orderConfirmation.orderId}</p>
+            {orderConfirmation.orderToken && (
+              <div style={{ 
+                backgroundColor: '#fff3cd', 
+                padding: '15px', 
+                borderRadius: '8px', 
+                marginBottom: '15px',
+                border: '2px solid #ff9800'
+              }}>
+                <p style={{ margin: '0 0 8px 0', fontSize: '0.9em', color: '#666' }}>Your Order Token (Show to Counter):</p>
+                <p style={{ margin: '0', fontSize: '2em', fontWeight: 'bold', color: '#ff9800', fontFamily: 'monospace' }}>
+                  {orderConfirmation.orderToken}
+                </p>
+              </div>
+            )}
+            {orderConfirmation.orderId && (
+              <p><strong>Order ID:</strong> {orderConfirmation.orderId}</p>
+            )}
+            <p><strong>Payment Method:</strong> {orderConfirmation.paymentMethod === 'PAY_AT_COUNTER' ? 'Pay at Counter' : 'Pay Now (Online)'}</p>
             <p><strong>Status:</strong> {orderConfirmation.status}</p>
             <p><strong>Payment Status:</strong> {orderConfirmation.paymentStatus}</p>
             <p><strong>Pickup Time:</strong> {new Date(orderConfirmation.pickupTime).toLocaleString()}</p>
             <p><strong>Total Amount:</strong> ₹{orderConfirmation.totalAmount.toFixed(2)}</p>
+            <div style={{ marginTop: '15px', padding: '10px', backgroundColor: '#f0f0f0', borderRadius: '5px' }}>
+              <p style={{ margin: '0', fontSize: '0.85em', color: '#666' }}>
+                {orderConfirmation.paymentMethod === 'PAY_AT_COUNTER' 
+                  ? '💳 Show the token above at the counter to complete payment'
+                  : '📱 Scan QR code or complete online payment'}
+              </p>
+            </div>
           </div>
           <button onClick={handleNewOrder} className="btn-primary">
             Place New Order
@@ -648,6 +704,58 @@ const normalizeCart = (resData) => {
                 </button>
               </div>
             </>
+          )}
+
+          {/* CURRENT ORDER SECTION - PERSISTENT DISPLAY */}
+          {currentOrder && (
+            <div className="current-order-section" style={{ marginTop: '30px', padding: '20px', backgroundColor: 'rgba(129, 199, 132, 0.15)', borderRadius: '12px', border: '2px solid #81c784' }}>
+              <h3 style={{ color: '#81c784', marginBottom: '15px', fontSize: '1.2rem', fontWeight: '600' }}>✅ Current Order Details</h3>
+              
+              {currentOrder.orderToken && (
+                <div style={{ 
+                  backgroundColor: '#fff3cd', 
+                  padding: '15px', 
+                  borderRadius: '8px', 
+                  marginBottom: '15px',
+                  border: '2px solid #ff9800'
+                }}>
+                  <p style={{ margin: '0 0 8px 0', fontSize: '0.9em', color: '#666' }}>Order Token (Show to Counter):</p>
+                  <p style={{ margin: '0', fontSize: '1.8em', fontWeight: 'bold', color: '#ff9800', fontFamily: 'monospace', letterSpacing: '2px' }}>
+                    {currentOrder.orderToken}
+                  </p>
+                </div>
+              )}
+              
+              <div style={{ fontSize: '0.95em', color: '#f5efe8' }}>
+                {currentOrder.orderId && (
+                  <p style={{ margin: '8px 0' }}><strong style={{ color: '#81c784' }}>Order ID:</strong> {currentOrder.orderId}</p>
+                )}
+                <p style={{ margin: '8px 0' }}><strong style={{ color: '#81c784' }}>Payment Method:</strong> {currentOrder.paymentMethod === 'PAY_AT_COUNTER' ? '💳 Pay at Counter' : '📱 Pay Now (Online)'}</p>
+                <p style={{ margin: '8px 0' }}><strong style={{ color: '#81c784' }}>Pickup Time:</strong> {new Date(currentOrder.pickupTime).toLocaleString()}</p>
+                <p style={{ margin: '8px 0' }}><strong style={{ color: '#81c784' }}>Total Amount:</strong> ₹{currentOrder.totalAmount.toFixed(2)}</p>
+                <p style={{ margin: '8px 0' }}><strong style={{ color: '#81c784' }}>Status:</strong> {currentOrder.status}</p>
+              </div>
+
+              <button
+                onClick={() => {
+                  setCurrentOrder(null);
+                  localStorage.removeItem('currentOrder');
+                }}
+                style={{
+                  marginTop: '15px',
+                  padding: '10px 20px',
+                  backgroundColor: '#666',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '0.9em',
+                  fontWeight: '600'
+                }}
+              >
+                Clear Order
+              </button>
+            </div>
           )}
         </div>
       </div>

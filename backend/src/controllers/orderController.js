@@ -89,13 +89,31 @@ exports.createOrder = async (req, res) => {
       paymentMethod: order.paymentMethod,
     });
 
-    await order.save();
+    const savedOrder = await order.save();
 
     console.log('✅ Order saved successfully:', {
-      orderId: order.orderId,
-      orderToken: order.orderToken,
-      _id: order._id,
+      orderId: savedOrder.orderId,
+      orderToken: savedOrder.orderToken,
+      _id: savedOrder._id,
     });
+
+    // Refresh the order to ensure all fields including orderId are populated
+    const refreshedOrder = await Order.findById(savedOrder._id).lean();
+    
+    console.log('🔍 Refreshed order from DB:', {
+      orderId: refreshedOrder?.orderId,
+      orderToken: refreshedOrder?.orderToken,
+      _id: refreshedOrder?._id,
+    });
+
+    // Validate orderId is present
+    if (!refreshedOrder?.orderId) {
+      console.error('❌ CRITICAL: orderId missing after refresh!', refreshedOrder);
+      // Fallback: ensure at least orderToken is there
+      if (!refreshedOrder?.orderToken) {
+        throw new Error('Order creation failed: missing both orderId and orderToken');
+      }
+    }
 
     // Clear user's cart
     const getCartModel = require('../models/Cart');
@@ -104,7 +122,7 @@ exports.createOrder = async (req, res) => {
 
     res.status(201).json({
       message: 'Order created successfully',
-      order,
+      order: refreshedOrder,
     });
   } catch (err) {
     console.error('Create order error:', err);
@@ -124,6 +142,8 @@ exports.getOrders = async (req, res) => {
     const Order = getOrderModel();
     const { status, filter } = req.query;
 
+    console.log('📋 Get orders request:', { filter, status, user: req.user?.email });
+
     let query = {};
 
     // Filter by status - prioritize filter parameter
@@ -135,14 +155,23 @@ exports.getOrders = async (req, res) => {
       query.status = status.toUpperCase();
     }
 
+    console.log('🔍 Query:', query);
+
     const orders = await Order.find(query)
       .sort({ createdAt: -1 })
-      .populate('user', 'name email')
       .lean();
 
-    res.json({ data: orders });
+    // Map orders to include user info from the user field
+    const ordersWithUserInfo = orders.map(order => ({
+      ...order,
+      userName: order.user?._id?.toString() || 'Unknown User'
+    }));
+
+    console.log(`✅ Found ${orders.length} orders`);
+
+    res.json({ data: ordersWithUserInfo });
   } catch (err) {
-    console.error('Get orders error:', err);
+    console.error('❌ Get orders error:', err);
     res.status(500).json({ message: 'Failed to fetch orders', error: err.message });
   }
 };
