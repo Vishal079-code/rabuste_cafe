@@ -227,7 +227,35 @@
   font-weight: 600;
   letter-spacing: -0.01em;
   transition: color 0.3s ease;
+}/* ===== FIX SIDEBAR VISIBILITY & SCROLL ===== */
+.admin-sidebar {
+  top: 140px; /* site navbar (~76px) + admin header (64px) */
+  height: calc(100vh - 140px);
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  padding-bottom: 40px; /* space so close button is reachable */
 }
+
+/* Smooth scrollbar (optional but classy) */
+.admin-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.admin-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 180, 80, 0.35);
+  border-radius: 10px;
+}
+
+.admin-sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 180, 80, 0.6);
+}
+
 
 .admin-modal h3:hover {
   color: #ffb347;
@@ -276,4 +304,122 @@
 
 .admin-modal select.input {
   cursor: pointer;
+}
+/* ================================ */
+/* ===== SIDEBAR OG HOVER FX ===== */
+/* ================================ */
+
+.admin-sidebar h4 {
+  position: relative;
+  padding: 10px 12px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* soft glow background */
+.admin-sidebar h4::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    transparent 30%,
+    rgba(255, 180, 90, 0.12),
+    transparent 70%
+  );
+  opacity: 0;
+  transform: translateX(-120%);
+  transition: opacity 0.35s ease, transform 0.45s ease;
+}
+
+/* bottom accent line */
+.admin-sidebar h4::after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  bottom: 6px;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #ff7a18, #ffb347);
+  border-radius: 10px;
+  transition: width 0.35s ease;
+}
+
+.admin-sidebar h4:hover::before {
+  opacity: 1;
+  transform: translateX(0%);
+}
+
+.admin-sidebar h4:hover::after {
+  width: 40%;
+}
+
+/* text movement + glow */
+.admin-sidebar h4:hover {
+  color: #ffcc9a;
+  text-shadow: 0 0 14px rgba(255, 180, 90, 0.35);
+  transform: translateX(10px);
+}
+
+/* ================================= */
+/* ===== ACTIVE STATE (OPTIONAL) ==== */
+/* ================================= */
+
+.admin-sidebar h4.active {
+  color: #ffb347;
+  background: rgba(255, 180, 90, 0.08);
+}
+
+.admin-sidebar h4.active::after {
+  width: 60%;
+}
+
+/* ================================= */
+/* ===== CLOSE BUTTON GLOW ========= */
+/* ================================= */
+
+.admin-sidebar .close {
+  position: relative;
+}
+
+.admin-sidebar .close::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 122, 24, 0.25),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.admin-sidebar .close:hover::after {
+  opacity: 1;
+}
+.admin-sidebar h4 {
+  position: relative;
+  z-index: 1;
+  overflow: visible; /* allow glow to breathe */
+}
+
+/* text always above effects */
+.admin-sidebar h4 span,
+.admin-sidebar h4 {
+  z-index: 2;
+}
+.admin-sidebar h4::before {
+  z-index: 0;
+  pointer-events: none;
+}
+.admin-sidebar h4:hover {
+  color: #ffcc9a;
+  text-shadow: 0 0 10px rgba(255, 180, 90, 0.25);
+  transform: translateX(6px); /* reduced from 10px */
+}
+.admin-sidebar h4 {
+  -webkit-font-smoothing: antialiased;
+  backface-visibility: hidden;
 }
