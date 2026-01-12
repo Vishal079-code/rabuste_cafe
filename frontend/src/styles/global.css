@@ -1020,7 +1020,7 @@ a:not(.cta):hover {
   align-items: center;
   justify-content: center;
   padding: 4rem 2rem;
-  background: rgba(34, 30, 28, 0.6);
+  background: rgba(97, 50, 5, 0.107);
   backdrop-filter: blur(20px);
   position: relative;
   overflow: hidden;
