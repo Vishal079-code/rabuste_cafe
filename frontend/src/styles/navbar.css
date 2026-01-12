@@ -6,46 +6,83 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 20px;
-  background: rgba(15, 12, 10, 0.98);
+  padding: 14px 32px;
+  background: linear-gradient(
+    180deg,
+    rgba(25, 18, 14, 0.99) 0%,
+    rgba(15, 12, 10, 0.98) 100%
+  );
+  border-bottom: 1px solid rgba(216, 107, 50, 0.12);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
 }
 
 /* ================= LOGO ================= */
 .logo {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   font-family: var(--font-heading);
-  font-size: 1.375rem;
+  font-size: 1.5rem;
   font-weight: 900;
   letter-spacing: 0.1875em;
   text-decoration: none;
   color: #f1a45c;
-  text-shadow: 0 0 12px rgba(216, 107, 50, 0.4);
-  transition: color 0.3s ease, letter-spacing 0.3s ease, text-shadow 0.3s ease;
+  text-shadow: 0 0 16px rgba(216, 107, 50, 0.5);
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  padding: 8px 12px;
+  border-radius: 12px;
+}
+
+.logo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(216, 107, 50, 0.1) 0%,
+    transparent 70%
+  );
+  border-radius: 12px;
+  opacity: 0;
+  transition: opacity 0.35s ease;
 }
 
 .logo:hover {
-  color: #d86b32;
-  letter-spacing: 0.2em;
+  color: #ffd699;
+  letter-spacing: 0.22em;
   text-shadow:
-    0 5px 15px rgba(216, 107, 50, 0.6),
-    0 0 30px rgba(216, 107, 50, 0.3);
+    0 8px 24px rgba(216, 107, 50, 0.8),
+    0 0 40px rgba(241, 164, 92, 0.4);
+  transform: translateY(-2px);
+}
+
+.logo:hover::before {
+  opacity: 1;
 }
 
 .nav-logo {
-  height: 40px;
+  height: 44px;
   width: auto;
   object-fit: contain;
   object-position: center;
+  filter: drop-shadow(0 4px 12px rgba(216, 107, 50, 0.3));
+  transition: all 0.35s ease;
+}
+
+.logo:hover .nav-logo {
+  filter: drop-shadow(0 6px 18px rgba(216, 107, 50, 0.6));
+  transform: scale(1.08);
 }
 
 /* ================= NAV ================= */
 .chip-nav {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .nav-wrap {
@@ -56,36 +93,44 @@
 .nav-button {
   position: relative;
   overflow: hidden;
-  padding: 10px 20px;
-  min-height: 40px;
+  padding: 11px 22px;
+  min-height: 42px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 40px;
-  border: 1.5px solid rgba(216, 107, 50, 0.55);
-  background: rgba(139, 90, 43, 0.22);
+  border-radius: 50px;
+  border: 1.8px solid rgba(216, 107, 50, 0.65);
+  background: linear-gradient(
+    135deg,
+    rgba(139, 90, 43, 0.28) 0%,
+    rgba(120, 75, 35, 0.18) 100%
+  );
   color: #f5efe8;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 800;
-  letter-spacing: 0.6px;
+  letter-spacing: 0.7px;
   text-transform: uppercase;
   white-space: nowrap;
   text-decoration: none;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.08);
   cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* ================= ACTIVE ================= */
 .nav-button.active {
   background: linear-gradient(
     135deg,
-    rgba(216, 107, 50, 0.5),
-    rgba(241, 164, 92, 0.3)
+    rgba(216, 107, 50, 0.65),
+    rgba(241, 164, 92, 0.42)
   );
-  border-color: #d86b32;
+  border-color: #ffc366;
   box-shadow:
-    0 0 16px rgba(216, 107, 50, 0.5),
-    inset 0 1px 0 rgba(255,255,255,0.12);
+    0 8px 24px rgba(216, 107, 50, 0.6),
+    inset 0 1px 0 rgba(255,255,255,0.18);
+  transform: translateY(-3px);
 }
 
 /* ================= TEXT ================= */
@@ -148,13 +193,32 @@
   position: relative;
   display: flex;
   align-items: center;
+  margin-left: 8px;
 }
 
 .profile-btn {
   padding: 0;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
+  background: linear-gradient(
+    135deg,
+    rgba(216, 107, 50, 0.25) 0%,
+    rgba(139, 90, 43, 0.18) 100%
+  );
+  border: 1.8px solid rgba(216, 107, 50, 0.55);
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.profile-btn:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(216, 107, 50, 0.45) 0%,
+    rgba(139, 90, 43, 0.35) 100%
+  );
+  border-color: #ffc366;
+  box-shadow: 0 6px 18px rgba(216, 107, 50, 0.4);
+  transform: translateY(-2px);
 }
 
 .profile-icon {
@@ -165,38 +229,49 @@
 /* ================= DROPDOWN ================= */
 .profile-dropdown {
   position: absolute;
-  top: calc(100% + 10px);
+  top: calc(100% + 12px);
   right: 0;
-  background: rgba(15, 12, 10, 0.98);
-  border: 1px solid rgba(216, 107, 50, 0.4);
-  border-radius: 14px;
-  padding: 6px;
-  min-width: 150px;
+  background: linear-gradient(
+    135deg,
+    rgba(25, 18, 14, 0.98) 0%,
+    rgba(15, 12, 10, 0.98) 100%
+  );
+  border: 1.2px solid rgba(216, 107, 50, 0.35);
+  border-radius: 16px;
+  padding: 8px;
+  min-width: 160px;
   box-shadow:
-    0 10px 35px rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 rgba(255,255,255,0.08);
-  backdrop-filter: blur(8px);
-  animation: dropdownFade 0.2s ease-out;
+    0 16px 48px rgba(0, 0, 0, 0.7),
+    inset 0 1px 1px rgba(255,255,255,0.1);
+  backdrop-filter: blur(12px);
+  animation: dropdownFade 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   z-index: 999;
 }
 
 .dropdown-item {
   width: 100%;
-  padding: 10px 12px;
+  padding: 12px 14px;
   background: transparent;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   color: #f5efe8;
   font-weight: 700;
-  letter-spacing: 0.6px;
+  letter-spacing: 0.7px;
   cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 13px;
 }
 
 .dropdown-item:hover {
-  background: rgba(216, 107, 50, 0.18);
+  background: linear-gradient(
+    135deg,
+    rgba(216, 107, 50, 0.25) 0%,
+    rgba(241, 164, 92, 0.15) 100%
+  );
+  transform: translateX(4px);
 }
 
 .logout-icon {
@@ -204,8 +279,14 @@
 }
 
 @keyframes dropdownFade {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { 
+    opacity: 0; 
+    transform: translateY(-8px) scale(0.96);
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* ================= HANDWRITTEN LOGO ================= */

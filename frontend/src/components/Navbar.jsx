@@ -142,7 +142,7 @@ const profileRef = useRef(null);
     <header className="top-bar">
       <NavLink to="/" className="logo handwritten-logo">
         {logoUrl && <img src={logoUrl} alt="Rabuste logo" className="nav-logo" />}
-        <HandwrittenText text=" Rabuste " />
+        {/*<HandwrittenText text=" Rabuste " />*/}
       </NavLink>
 
 
