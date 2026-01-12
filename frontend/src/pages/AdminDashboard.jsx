@@ -187,25 +187,55 @@ const AdminDashboard = () => {
 
   /* ===== GSAP SIDEBAR ===== */
   
-  useEffect(() => {
-    if (!sidebarRef.current) return;
+ useEffect(() => {
+  if (!sidebarRef.current) return;
 
-    tl.current = gsap.timeline({ paused: true });
+  const items = sidebarRef.current.querySelectorAll("h4");
 
-    // Slide in from left with a "shatter" effect
-    tl.current.fromTo(
-      sidebarRef.current,
-      { x: -260, rotationY: -15, opacity: 0 },
-      {
-        x: 0,
-        rotationY: 0,
-        opacity: 1,
-        duration: 0.7,
-        ease: 'power4.out',
-        stagger: 0.05,
-      }
-    );
-  }, []);
+  tl.current = gsap.timeline({ paused: true });
+
+  /* Sidebar container – smooth slide with depth */
+  tl.current.fromTo(
+    sidebarRef.current,
+    {
+      x: -280,
+      opacity: 0,
+      rotationY: -18,
+      transformPerspective: 800,
+      transformOrigin: "left center",
+    },
+    {
+      x: 0,
+      opacity: 1,
+      rotationY: 0,
+      duration: 0.75,
+      ease: "power4.out",
+    }
+  );
+
+  /* Stagger menu items – premium reveal */
+  tl.current.fromTo(
+    items,
+    {
+      x: -30,
+      opacity: 0,
+      filter: "blur(6px)",
+    },
+    {
+      x: 0,
+      opacity: 1,
+      filter: "blur(0px)",
+      duration: 0.45,
+      ease: "power3.out",
+      stagger: {
+        each: 0.08,
+        from: "start",
+      },
+    },
+    "-=0.4" // overlap with sidebar animation
+  );
+
+}, []);
 
   /* ===== HANDLERS ===== */
   const handleMenuSubmit = async () => {
