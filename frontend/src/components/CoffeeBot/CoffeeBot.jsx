@@ -172,6 +172,7 @@ const CoffeeBot = () => {
     },
   ]);
   const [loading, setLoading] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
 
   // 1. Session Management
   // Store session_id in a ref so it doesn't change on re-renders
@@ -182,6 +183,16 @@ const CoffeeBot = () => {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
+
+  // Show welcome message on mount
+  useEffect(() => {
+    setShowWelcome(true);
+    const timer = setTimeout(() => {
+      setShowWelcome(false);
+    }, 3000); // 3 seconds
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
@@ -262,6 +273,17 @@ const CoffeeBot = () => {
 
   return (
     <>
+      {/* Welcome Message Dropdown */}
+      {showWelcome && (
+        <div className="coffee-bot-welcome">
+          <div className="welcome-content">
+            <span className="welcome-icon">☕</span>
+            <span className="welcome-text">Hi! I'm your Coffee Buddy. Click me to chat!</span>
+          </div>
+          <div className="welcome-arrow"></div>
+        </div>
+      )}
+
       {/* Floating Button */}
       <div className="coffee-bot-btn" onClick={toggleCoffeeBot}>
         ☕
