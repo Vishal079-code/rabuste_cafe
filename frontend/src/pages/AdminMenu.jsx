@@ -667,9 +667,9 @@ const handleSaveEdit = async () => {
             });
           }}>
             <div className="admin-modal" onClick={e => e.stopPropagation()}>
-              <h3>Add New Menu Item</h3>
+              <h3>➕ Add New Menu Item</h3>
               
-              <form onSubmit={handleAddItem}>
+              <form onSubmit={handleAddItem} className="admin-form">
                 <label>
                   Name *
                   <input
