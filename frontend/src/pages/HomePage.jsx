@@ -7,13 +7,12 @@ import {
   fetchMenuImages,
 } from '../services/api';
 import Hero from '../sections/Hero';
-import WhyRobusta from '../sections/WhyRobusta';
-import CoffeeMenu from '../sections/CoffeeMenu';
-import ArtGallery from '../sections/ArtGallery';
-import Workshops from '../sections/Workshops';
-import Franchise from '../sections/Franchise';
-import AIExperience from '../sections/AIExperience';
 import Footer from '../sections/Footer';
+import HomePreviewSection from '../components/HomePreviewSection';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const HomePage = () => {
   const [coffee, setCoffee] = useState([]);
@@ -21,6 +20,7 @@ const HomePage = () => {
   const [workshops, setWorkshops] = useState([]);
   const [insights, setInsights] = useState(null);
   const [logos, setLogos] = useState([]);
+  const [menuImages, setMenuImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -46,6 +46,14 @@ const HomePage = () => {
           return isLogo;
         });
         setLogos(logoImages);
+
+        // Set menu images (non-logos)
+        const menuImgs = imagesRes.data.filter((image) => {
+          const isLogo = image.category?.toLowerCase() === 'logo' || 
+                        image.public_id?.toLowerCase().includes('logo');
+          return !isLogo;
+        });
+        setMenuImages(menuImgs);
       } catch (err) {
         setError('Cannot reach Rabuste API. Start backend at http://localhost:5000');
       } finally {
@@ -58,38 +66,39 @@ const HomePage = () => {
   const primaryLogo = logos.length > 0 ? logos[0] : null;
   const secondaryLogo = logos.length > 1 ? logos[1] : null;
 
-  // Set up scroll animations for sections (only on HomePage)
+  // Set up GSAP scroll animations for sections
   useEffect(() => {
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px',
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('scroll-visible');
-          observer.unobserve(entry.target);
+    const sections = gsap.utils.toArray('.page [data-scroll-section]');
+    
+    sections.forEach((section, index) => {
+      gsap.set(section, { opacity: 0, y: 50 });
+      
+      ScrollTrigger.create({
+        trigger: section,
+        start: "top 80%",
+        end: "bottom 20%",
+        onEnter: () => {
+          gsap.to(section, {
+            opacity: 1,
+            y: 0,
+            duration: 1,
+            ease: "power2.out",
+            delay: index * 0.1
+          });
+        },
+        onLeaveBack: () => {
+          gsap.to(section, {
+            opacity: 0,
+            y: 50,
+            duration: 0.5,
+            ease: "power2.in"
+          });
         }
       });
-    }, observerOptions);
-
-    // Only observe sections with data-scroll-section attribute (HomePage specific)
-    const sections = document.querySelectorAll('.page [data-scroll-section]');
-    sections.forEach((section) => observer.observe(section));
-
-    // Fallback: make sections visible after a short delay if observer hasn't triggered
-    const fallbackTimeout = setTimeout(() => {
-      sections.forEach((section) => {
-        if (!section.classList.contains('scroll-visible')) {
-          section.classList.add('scroll-visible');
-        }
-      });
-    }, 500);
+    });
 
     return () => {
-      sections.forEach((section) => observer.unobserve(section));
-      clearTimeout(fallbackTimeout);
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);
 
@@ -108,24 +117,72 @@ const HomePage = () => {
           </section>
         </div>
       )}
-      {/*<div data-scroll-section>
-        <WhyRobusta />
-      </div>*/}
-      <div data-scroll-section>
-        <CoffeeMenu coffees={coffee} loading={loading} />
-      </div>
-      <div data-scroll-section>
-        <ArtGallery art={art} loading={loading} insights={insights} />
-      </div>
-      <div data-scroll-section>
-        <Workshops workshops={workshops} loading={loading} />
-      </div>
-      <div data-scroll-section>
-        <Franchise />
-      </div>
-      <div data-scroll-section>
-        <AIExperience coffees={coffee} art={art} workshops={workshops} />
-      </div>
+      <HomePreviewSection
+        title="Why Rabusta?"
+        description="Discover what makes Rabusta beans extraordinary. Known for their bold flavor, resilience, and unique characteristics that set them apart in the world of coffee."
+        extraContent={
+          <div>
+            <p><strong>Bold & Robust:</strong> Higher caffeine content for an invigorating experience.</p>
+            <p><strong>Resilient:</strong> Thrives in diverse climates, ensuring consistent quality.</p>
+            <p><strong>Distinctive:</strong> Earthy notes with a smooth, full-bodied finish.</p>
+          </div>
+        }
+        layout="text-heavy"
+        visual={
+          <img src="https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?w=400" alt="Premium Coffee Beans" />
+        }
+        animateTitle={true}
+        ctaLink="/why-robusta"
+      />
+      <HomePreviewSection
+        title="Crafted Coffee Experiences"
+        description="Indulge in the bold, robust essence of our premium Rabusta beans. Known for their intense flavor profile, higher caffeine content, and distinctive character, these beans deliver a coffee experience that's both invigorating and unforgettable."
+        visual={
+          menuImages.slice(0, 3).map((img, idx) => (
+            <img key={idx} src={img.url} alt={`Coffee ${idx + 1}`} />
+          ))
+        }
+        animateTitle={true}
+        ctaLink="/menu"
+      />
+      <HomePreviewSection
+        title="Where Coffee Meets Art"
+        description="Where the bold spirit of Rabusta coffee inspires artistic expression. Discover curated artworks that capture the passion, creativity, and distinctive character of our coffee culture, blending visual storytelling with the robust flavors we cherish."
+        visual={
+          art.slice(0, 2).map((piece, idx) => (
+            <img key={idx} src={piece.imageUrl} alt={`Art ${idx + 1}`} />
+          ))
+        }
+        layout="split-art"
+        animateTitle={true}
+        ctaLink="/art"
+      />
+      <HomePreviewSection
+        title="Learn. Brew. Create."
+        description="Join our immersive workshops to master the art of brewing bold Rabusta coffee. Learn techniques that highlight the bean's unique resilience and flavor, turning every session into a creative journey of discovery and craftsmanship."
+        visual={
+          <img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400" alt="Coffee Workshop" />
+        }
+        layout="horizontal"
+        ctaLink="/workshops"
+      />
+      <HomePreviewSection
+        title="AI-Powered Coffee Exploration"
+        description="Let artificial intelligence guide you through personalized Rabusta coffee recommendations. Experience how AI enhances the discovery of bold flavors, pairing suggestions, and creative insights tailored to your taste preferences."
+        visual={
+          <img src="https://images.unsplash.com/photo-1555255707-c07966088b7b?w=400" alt="AI Coffee Technology" />
+        }
+        ctaLink="/ai-experience"
+      />
+      <HomePreviewSection
+        title="Grow With Rabuste"
+        description="Partner with us to bring the bold Rabusta experience to your community. Join our franchise network and build a thriving business centered around premium coffee culture, resilience, and distinctive quality."
+        visual={
+          <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400" alt="Coffee Shop Business" />
+        }
+        layout="text-heavy"
+        ctaLink="/franchise"
+      />
       <div data-scroll-section>
         <Footer />
       </div>
