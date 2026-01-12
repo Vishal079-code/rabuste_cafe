@@ -423,3 +423,191 @@
   -webkit-font-smoothing: antialiased;
   backface-visibility: hidden;
 }
+/* ===== SIDEBAR BASE ===== */
+.admin-sidebar {
+  background: #0e0e11;
+  padding-top: 80px; /* space below header */
+  width: 260px;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 20;
+}
+
+/* ===== SIDEBAR ITEMS ===== */
+.admin-sidebar h4 {
+  padding: 14px 20px;
+  color: #bdbdbd;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+  transition: 
+    color 0.25s ease,
+    background 0.25s ease,
+    transform 0.25s ease;
+}
+
+/* LEFT ACCENT BAR */
+.admin-sidebar h4::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 4px;
+  height: 0;
+  background: linear-gradient(180deg, #ff7a18, #ff9f45);
+  border-radius: 4px;
+  transform: translateY(-50%);
+  transition: height 0.25s ease;
+}
+
+/* ===== HOVER EFFECT ===== */
+.admin-sidebar h4:hover {
+  color: #ffffff;
+  background: rgba(255, 122, 24, 0.08);
+  transform: translateX(6px);
+}
+
+.admin-sidebar h4:hover::before {
+  height: 60%;
+}
+
+/* ===== ACTIVE STATE ===== */
+.admin-sidebar h4.active {
+  color: #ffffff;
+  background: rgba(255, 122, 24, 0.15);
+}
+
+.admin-sidebar h4.active::before {
+  height: 80%;
+}
+
+/* ===== CLOSE ICON ===== */
+.admin-sidebar .close {
+  margin-top: auto;
+  font-size: 22px;
+  padding: 18px;
+  color: #888;
+  cursor: pointer;
+  transition: color 0.25s ease, transform 0.25s ease;
+}
+
+.admin-sidebar .close:hover {
+  color: #ff7a18;
+  transform: rotate(90deg);
+}
+/* =============================== */
+/* ===== MENU ITEMS UI FIX ======= */
+/* =============================== */
+
+/* LABEL */
+.admin-content label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #e0e0e0;
+  letter-spacing: 0.02em;
+}
+
+/* ===== SELECT DROPDOWN ===== */
+.admin-content select {
+  width: 100%;
+  padding: 14px 44px 14px 16px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #15151b, #0f0f14);
+  border: 1px solid #2a2a35;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 500;
+  appearance: none;
+  cursor: pointer;
+  transition: 
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.2s ease;
+}
+
+/* Custom dropdown arrow */
+.admin-content select {
+  background-image:
+    linear-gradient(45deg, transparent 50%, #ffb347 50%),
+    linear-gradient(135deg, #ffb347 50%, transparent 50%),
+    linear-gradient(to right, transparent, transparent);
+  background-position:
+    calc(100% - 22px) 55%,
+    calc(100% - 16px) 55%,
+    100% 0;
+  background-size:
+    6px 6px,
+    6px 6px,
+    2.5em 2.5em;
+  background-repeat: no-repeat;
+}
+
+/* Hover */
+.admin-content select:hover {
+  border-color: #ff7a18;
+  box-shadow: 0 0 0 3px rgba(255, 122, 24, 0.15);
+}
+
+/* Focus */
+.admin-content select:focus {
+  outline: none;
+  border-color: #ffb347;
+  box-shadow: 0 0 0 4px rgba(255, 180, 90, 0.25);
+}
+
+/* ===== OPTION LIST ===== */
+.admin-content select option {
+  background: #0f0f14;
+  color: #ffffff;
+  padding: 12px;
+}
+
+/* Disabled option */
+.admin-content select option:disabled {
+  color: #777;
+}
+
+/* ===== PRIMARY BUTTON ===== */
+.admin-content button {
+  margin-top: 18px;
+  padding: 14px 32px;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, #ff7a18, #ffb347);
+  color: #111;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    filter 0.25s ease;
+}
+
+/* Button hover */
+.admin-content button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(255, 122, 24, 0.45);
+  filter: brightness(1.05);
+}
+
+/* Button active */
+.admin-content button:active {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(255, 122, 24, 0.35);
+}
+
+/* Disabled button */
+.admin-content button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}

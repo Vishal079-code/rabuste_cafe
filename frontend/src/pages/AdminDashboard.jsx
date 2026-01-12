@@ -236,6 +236,47 @@ const AdminDashboard = () => {
   );
 
 }, []);
+useEffect(() => {
+  const btn = document.querySelector(".admin-back-btn");
+  if (!btn) return;
+
+  // Entry animation
+  gsap.fromTo(
+    btn,
+    {
+      y: -20,
+      opacity: 0,
+      scale: 0.9,
+      filter: "blur(6px)",
+    },
+    {
+      y: 0,
+      opacity: 1,
+      scale: 1,
+      filter: "blur(0px)",
+      duration: 0.6,
+      delay: 0.3,
+      ease: "power3.out",
+    }
+  );
+
+  // Hover micro-interaction
+  btn.addEventListener("mouseenter", () => {
+    gsap.to(btn, {
+      scale: 1.05,
+      duration: 0.25,
+      ease: "power2.out",
+    });
+  });
+
+  btn.addEventListener("mouseleave", () => {
+    gsap.to(btn, {
+      scale: 1,
+      duration: 0.25,
+      ease: "power2.out",
+    });
+  });
+}, []);
 
   /* ===== HANDLERS ===== */
   const handleMenuSubmit = async () => {
