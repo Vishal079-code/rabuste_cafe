@@ -281,17 +281,33 @@ useEffect(() => {
   /* ===== HANDLERS ===== */
   const handleMenuSubmit = async () => {
     setError('');
+    
+    // Validate form data
+    if (!menuForm.category && !menuForm.url) {
+      setError('Please fill in at least category or URL');
+      return;
+    }
+    
     try {
+      console.log('📝 Submitting menu form:', { editingMenuId, menuForm });
+      
       if (editingMenuId) {
-        await adminUpdateMenu(editingMenuId, menuForm);
+        const res = await adminUpdateMenu(editingMenuId, menuForm);
+        console.log('✅ Update response:', res.data);
         setEditingMenuId(null);
       } else {
-        await adminCreateMenu(menuForm);
+        const res = await adminCreateMenu(menuForm);
+        console.log('✅ Create response:', res.data);
       }
       setMenuForm({ category: '', url: '', public_id: '' });
-      fetchMenuItems();
+      await fetchMenuItems();
+      setError(''); // Clear any previous errors
     } catch (err) {
-      setError(err?.response?.data?.message || 'Failed to save menu item');
+      console.error('❌ Error submitting menu form:', err);
+      const errorMsg = err?.response?.data?.message || err?.message || 'Failed to save menu item';
+      console.error('Error message:', errorMsg);
+      console.error('Full error response:', err?.response?.data);
+      setError(errorMsg);
     }
   };
 

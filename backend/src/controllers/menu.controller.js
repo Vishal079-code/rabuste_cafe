@@ -44,14 +44,27 @@ exports.getItems = async (req, res) => {
 exports.createItem = async (req, res) => {
   try {
     const { MenuItem } = getModels();
+    
+    // Generate string ID if not provided
+    const itemId = req.body._id || req.body.id || `itm_${Date.now()}`;
+    
     const itemData = {
-      name: req.body.name,
+      _id: itemId,
+      name: req.body.name || req.body.category || '',
+      category: req.body.category,
+      url: req.body.url,
+      public_id: req.body.public_id,
       groupId: req.body.groupId,
       displayOrder: req.body.displayOrder || 0,
       isActive: req.body.isActive !== false,
       prices: req.body.prices || []
     };
+    
+    console.log(`✨ Creating new item with data:`, itemData);
+    
     const item = await MenuItem.create(itemData);
+    
+    console.log(`✅ Item created successfully:`, item);
     res.status(201).json(item);
   } catch (err) {
     console.error('Create item error:', err);
@@ -62,22 +75,37 @@ exports.createItem = async (req, res) => {
 exports.updateItem = async (req, res) => {
   try {
     const { MenuItem } = getModels();
-    const updateData = {
-      name: req.body.name,
-      isActive: req.body.isActive,
-      prices: req.body.prices
-    };
-    if (req.body.displayOrder !== undefined) {
-      updateData.displayOrder = req.body.displayOrder;
-    }
-    const item = await MenuItem.findByIdAndUpdate(
-      req.params.id,
-      updateData,
-      { new: true, runValidators: true }
+    const itemId = req.params.id;
+    
+    const updateData = {};
+    
+    // Handle all possible fields
+    if (req.body.name !== undefined) updateData.name = req.body.name;
+    if (req.body.category !== undefined) updateData.category = req.body.category;
+    if (req.body.url !== undefined) updateData.url = req.body.url;
+    if (req.body.public_id !== undefined) updateData.public_id = req.body.public_id;
+    if (req.body.isActive !== undefined) updateData.isActive = req.body.isActive;
+    if (req.body.displayOrder !== undefined) updateData.displayOrder = req.body.displayOrder;
+    if (req.body.prices !== undefined) updateData.prices = req.body.prices;
+    if (req.body.groupId !== undefined) updateData.groupId = req.body.groupId;
+    
+    console.log(`📝 Updating item with id: ${itemId}`, updateData);
+    
+    // Use updateOne with string _id to avoid ObjectId casting
+    const result = await MenuItem.updateOne(
+      { _id: itemId },
+      { $set: updateData }
     );
-    if (!item) {
+    
+    if (result.matchedCount === 0) {
+      console.error(`Item not found with id: ${itemId}`);
       return res.status(404).json({ message: 'Item not found' });
     }
+    
+    // Fetch and return updated item
+    const item = await MenuItem.findOne({ _id: itemId });
+    
+    console.log(`✅ Item updated successfully:`, item);
     res.json(item);
   } catch (err) {
     console.error('Update item error:', err);
@@ -88,10 +116,19 @@ exports.updateItem = async (req, res) => {
 exports.deleteItem = async (req, res) => {
   try {
     const { MenuItem } = getModels();
-    const item = await MenuItem.findByIdAndDelete(req.params.id);
-    if (!item) {
+    const itemId = req.params.id;
+    
+    console.log(`🗑️ Deleting item with id: ${itemId}`);
+    
+    // Use deleteOne with string _id to avoid ObjectId casting
+    const result = await MenuItem.deleteOne({ _id: itemId });
+    
+    if (result.deletedCount === 0) {
+      console.error(`Item not found with id: ${itemId}`);
       return res.status(404).json({ message: 'Item not found' });
     }
+    
+    console.log(`✅ Item deleted successfully`);
     res.json({ message: 'Item deleted successfully' });
   } catch (err) {
     console.error('Delete item error:', err);
