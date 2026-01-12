@@ -1,7 +1,7 @@
 import { useEffect, useRef,useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import HandwrittenText from "../components/HandwrittenText";
-
+import { fetchMenuImages } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import gsap from "gsap";
 import "../styles/navbar.css";
@@ -10,10 +10,34 @@ import "../styles/navbar.css";
 const Navbar = () => {
   const [openProfile, setOpenProfile] = useState(false);
 const profileRef = useRef(null);
+  const [logoUrl, setLogoUrl] = useState(null);
 
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const navRootRef = useRef(null);
+
+  useEffect(() => {
+    let mounted = true;
+    fetchMenuImages()
+      .then((res) => {
+        const images = Array.isArray(res.data) ? res.data : [];
+        const logos = images.filter(
+          (img) =>
+            img.category === "logo" ||
+            (img.public_id && img.public_id.includes("logo"))
+        );
+        const primary =
+          logos.find((l) => l.public_id && l.public_id.includes("primary")) ||
+          logos[0];
+        if (mounted && primary) {
+          setLogoUrl(primary.url || primary.secure_url || null);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -117,8 +141,9 @@ const profileRef = useRef(null);
   return (
     <header className="top-bar">
       <NavLink to="/" className="logo handwritten-logo">
-  <HandwrittenText text=" Rabuste " />
-</NavLink>
+        {logoUrl && <img src={logoUrl} alt="Rabuste logo" className="nav-logo" />}
+        <HandwrittenText text=" Rabuste " />
+      </NavLink>
 
 
       <nav className="chip-nav" ref={navRootRef}>
