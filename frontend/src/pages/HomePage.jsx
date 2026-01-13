@@ -133,6 +133,7 @@ const HomePage = () => {
         }
         animateTitle={true}
         ctaLink="/why-robusta"
+        ctaText="Learn More"
       />
       <HomePreviewSection
         title="Crafted Coffee Experiences"
@@ -144,6 +145,7 @@ const HomePage = () => {
         }
         animateTitle={true}
         ctaLink="/menu"
+        ctaText="View Menu"
       />
       <HomePreviewSection
         title="Where Coffee Meets Art"
@@ -156,6 +158,7 @@ const HomePage = () => {
         layout="split-art"
         animateTitle={true}
         ctaLink="/art"
+        ctaText="View Arts!"
       />
       <HomePreviewSection
         title="Learn. Brew. Create."
@@ -165,6 +168,7 @@ const HomePage = () => {
         }
         layout="horizontal"
         ctaLink="/workshops"
+        ctaText="Join Workshop"
       />
       <HomePreviewSection
         title="AI-Powered Coffee Exploration"
@@ -173,6 +177,7 @@ const HomePage = () => {
           <img src="https://images.unsplash.com/photo-1555255707-c07966088b7b?w=400" alt="AI Coffee Technology" />
         }
         ctaLink="/ai-experience"
+        ctaText="Explore AI"
       />
       <HomePreviewSection
         title="Grow With Rabuste"
@@ -182,6 +187,7 @@ const HomePage = () => {
         }
         layout="text-heavy"
         ctaLink="/franchise"
+        ctaText="Learn More"
       />
       <div data-scroll-section>
         <Footer />
