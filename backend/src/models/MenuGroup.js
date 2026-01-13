@@ -5,7 +5,7 @@ const { getMenuDB } = require('../config/db');
 const schema = new mongoose.Schema(
   {
     name: { type: String, required: true },
-    subCategoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'MenuSubCategory', required: true },
+    subCategoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'MenuSubCategory' },
     displayOrder: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
   },

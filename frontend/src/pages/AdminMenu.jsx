@@ -3,7 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../styles/AdminDashboard.css';
 
-// Same category logic as MenuViewer.jsx
+// API Base URL from environment or default
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000/api';
+
+
 const MENU_TABS = [
   "Robusta Speciality Coffee",
   "Blend Coffee",
@@ -237,7 +240,7 @@ const handleSaveEdit = async () => {
       if (!group) {
         // Create new group for this section
         const token = localStorage.getItem('rabuste_token');
-        const groupRes = await fetch('http://localhost:5000/api/admin/menu/group', {
+        const groupRes = await fetch(`${API_BASE}/admin/menu/group`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -262,7 +265,7 @@ const handleSaveEdit = async () => {
       const token = localStorage.getItem('rabuste_token');
       const tagsArray = addForm.tags ? addForm.tags.split(',').map(t => t.trim()).filter(Boolean) : [];
 
-      const res = await fetch('http://localhost:5000/api/admin/menu/item', {
+      const res = await fetch(`${API_BASE}/admin/menu/item`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -667,9 +670,9 @@ const handleSaveEdit = async () => {
             });
           }}>
             <div className="admin-modal" onClick={e => e.stopPropagation()}>
-              <h3>Add New Menu Item</h3>
+              <h3>➕ Add New Menu Item</h3>
               
-              <form onSubmit={handleAddItem}>
+              <form onSubmit={handleAddItem} className="admin-form">
                 <label>
                   Name *
                   <input

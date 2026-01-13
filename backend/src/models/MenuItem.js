@@ -11,13 +11,17 @@ const priceSchema = new mongoose.Schema({
 
 const schema = new mongoose.Schema(
   {
+    _id: { type: String, required: true }, // Allow string IDs like "itm_robusta_iced_americano"
     name: { type: String, required: true },
-    groupId: { type: mongoose.Schema.Types.ObjectId, ref: 'MenuGroup', required: true },
+    category: { type: String },
+    url: { type: String },
+    public_id: { type: String },
+    groupId: { type: String }, // Changed to String to match existing data
     displayOrder: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
     prices: [priceSchema],
   },
-  { timestamps: true }
+  { timestamps: true, _id: true }
 );
 
 schema.index({ name: 1 });
