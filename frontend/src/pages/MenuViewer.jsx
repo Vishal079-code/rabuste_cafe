@@ -2,6 +2,10 @@ import { useEffect, useState, useRef, useLayoutEffect } from "react";
 import gsap from "gsap";
 import "../styles/MenuViewer.css";
 
+/* ================= API CONFIG ================= */
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000/api';
+console.log('🔗 MenuViewer API_BASE:', API_BASE);
+
 /* ================= CONFIG ================= */
 
 const MENU_TABS = [
@@ -79,8 +83,7 @@ export default function MenuViewer() {
   useEffect(() => {
     const fetchMenuData = async () => {
       try {
-        const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:5000/api';
-        const debugUrl = `${apiBase.replace(/\/api$/, '')}/debug/menu-full`;
+        const debugUrl = `${API_BASE.replace(/\/api$/, '')}/debug/menu-full`;
         console.log('📥 MenuViewer: Fetching from', debugUrl);
         
         const res = await fetch(debugUrl);

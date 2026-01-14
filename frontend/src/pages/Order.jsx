@@ -2,6 +2,11 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { createOrder, getCart, addToCart, updateCart, removeFromCart, clearCart } from '../services/api';
 import '../styles/Order.css';
+
+/* ================= API CONFIG ================= */
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000/api';
+console.log('🔗 Order API_BASE:', API_BASE);
+
 // Category ID mapping (matching MenuViewer)
 const CATEGORY_ID_MAP = {
   "Robusta Speciality Coffee": "cat_robusta",
@@ -118,8 +123,7 @@ const Order = () => {
   useEffect(() => {
     const fetchMenu = async () => {
       try {
-        const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:5000/api';
-        const debugUrl = `${apiBase.replace(/\/api$/, '')}/debug/menu-full`;
+        const debugUrl = `${API_BASE.replace(/\/api$/, '')}/debug/menu-full`;
         console.log('📥 Order: Fetching from', debugUrl);
         
         const res = await fetch(debugUrl);
