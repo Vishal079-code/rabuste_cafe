@@ -25,6 +25,7 @@ import {
   adminCompleteOrder,
   adminMarkOrderAsPaid,
   adminVerifyAndCompleteOrder,
+  adminDeleteOrder,
 } from '../services/api';
 
 import '../styles/AdminDashboard.css';
@@ -1265,7 +1266,33 @@ useEffect(() => {
                               </div>
                             )}
                             {order.status === 'COMPLETED' && (
-                              <span style={{ color: '#999', fontSize: '0.75rem' }}>✓ Completed</span>
+                              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                <span style={{ color: '#999', fontSize: '0.75rem' }}>✓ Completed</span>
+                                <button
+                                  onClick={async () => {
+                                    if (!confirm('Clear this completed order? This will delete the order record.')) return;
+                                    setError('');
+                                    try {
+                                      await adminDeleteOrder(order._id);
+                                      setOrders(prev => prev.filter(o => o._id !== order._id));
+                                    } catch (err) {
+                                      setError(err?.response?.data?.message || 'Failed to clear order');
+                                    }
+                                  }}
+                                  style={{
+                                    padding: '6px 10px',
+                                    fontSize: '12px',
+                                    background: '#d32f2f',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    color: 'white',
+                                    cursor: 'pointer',
+                                    fontWeight: '600',
+                                  }}
+                                >
+                                  Clear
+                                </button>
+                              </div>
                             )}
                           </td>
                         </tr>

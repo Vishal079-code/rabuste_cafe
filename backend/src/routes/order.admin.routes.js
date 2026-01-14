@@ -20,4 +20,7 @@ router.put('/:id/mark-paid', markAsPaid);
 // PUT /api/admin/orders/:id/verify-complete - verify PAY_NOW order and complete it
 router.put('/:id/verify-complete', verifyAndComplete);
 
+// DELETE /api/admin/orders/:id - delete order
+router.delete('/:id', require('../controllers/orderController').deleteOrder);
+
 module.exports = router;

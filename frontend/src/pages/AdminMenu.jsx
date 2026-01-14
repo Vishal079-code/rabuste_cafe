@@ -375,7 +375,9 @@ const handleSaveEdit = async () => {
     <div className="admin-section">
       <header className="admin-header">
         <h2>Menu Management</h2>
-        <button onClick={() => navigate('/admin')}>Back to Dashboard</button>
+        <button className="admin-back-btn" onClick={() => navigate('/admin')} aria-label="Back to Dashboard">
+          ← Back to Dashboard
+        </button>
       </header>
 
       <main className="admin-content" style={{ maxWidth: '1400px' }}>

@@ -79,5 +79,6 @@ export const adminGetOrders = (filter) => {
 export const adminCompleteOrder = (id) => api.put(`/admin/orders/${id}/complete`);
 export const adminMarkOrderAsPaid = (id) => api.put(`/admin/orders/${id}/mark-paid`);
 export const adminVerifyAndCompleteOrder = (id) => api.put(`/admin/orders/${id}/verify-complete`);
+export const adminDeleteOrder = (id) => api.delete(`/admin/orders/${id}`);
 
 export default api;

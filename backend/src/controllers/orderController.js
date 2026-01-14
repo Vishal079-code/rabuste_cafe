@@ -273,3 +273,21 @@ exports.verifyAndComplete = async (req, res) => {
     res.status(500).json({ message: 'Failed to verify and complete order', error: err.message });
   }
 };
+
+// ADMIN: Delete order
+exports.deleteOrder = async (req, res) => {
+  try {
+    const Order = getOrderModel();
+    const { id } = req.params;
+
+    const order = await Order.findById(id);
+    if (!order) return res.status(404).json({ message: 'Order not found' });
+
+    await Order.deleteOne({ _id: id });
+
+    res.json({ message: 'Order deleted successfully' });
+  } catch (err) {
+    console.error('Delete order error:', err);
+    res.status(500).json({ message: 'Failed to delete order', error: err.message });
+  }
+};
