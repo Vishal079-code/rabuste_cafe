@@ -24,7 +24,8 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://rabustecafe1-cvoionyyj-aayush-097s-projects.vercel.app/"
+      "http://localhost:3000",
+      "https://rabustecafe1-cvoionyyj-aayush-097s-projects.vercel.app"
     ],
     credentials: true
   })
