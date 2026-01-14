@@ -76,13 +76,35 @@ export default function MenuViewer() {
   const overlayShadowRef = useRef(null);
   const contentScope = useRef(null);
 
-  useEffect(() => {
+  {/*useEffect(() => {
     const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:5000/api';
     const debugUrl = `${apiBase.replace(/\/api$/, '')}/debug/menu-full`;
     fetch(debugUrl)
       .then((r) => r.json())
       .then(setData);
-  }, []);
+  }, []);*/}
+  useEffect(() => {
+  const apiBase = import.meta.env.VITE_API_BASE;
+
+  if (!apiBase) {
+    console.error('VITE_API_BASE is not defined');
+    return;
+  }
+
+  const backendBase = apiBase.replace(/\/api$/, '');
+  const debugUrl = `${backendBase}/debug/menu-full`;
+
+  fetch(debugUrl)
+    .then((r) => {
+      if (!r.ok) throw new Error('Failed to fetch menu');
+      return r.json();
+    })
+    .then(setData)
+    .catch((err) => {
+      console.error('Menu fetch failed:', err);
+    });
+}, []);
+
 
   useLayoutEffect(() => {
   const ctx = gsap.context(() => {
