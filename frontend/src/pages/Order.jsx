@@ -119,16 +119,18 @@ const Order = () => {
     const fetchMenu = async () => {
       try {
         const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:5000/api';
-        const res = await fetch(`${apiBase.replace(/\/api$/, '')}/debug/menu-full`);
+        const debugUrl = `${apiBase.replace(/\/api$/, '')}/debug/menu-full`;
+        console.log('📥 Order: Fetching from', debugUrl);
+        
+        const res = await fetch(debugUrl);
+        if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch menu`);
+        
         const data = await res.json();
         
-        console.log('📥 MENU DATA FETCHED:');
-        console.log('  Categories:', data.categories?.length);
-        console.log('  SubCategories:', data.subCategories?.length);
-        console.log('  Items:', data.items?.length);
-        if (data.items?.length > 0) {
-          console.log('  First item:', data.items[0]);
-        }
+        console.log('✅ Order: Menu loaded -', {
+          categories: data.categories?.length,
+          items: data.items?.length
+        });
         
         setMenuData(data);
         // Set first active category's string ID (e.g., "cat_robusta")
