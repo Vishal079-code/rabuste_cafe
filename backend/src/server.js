@@ -22,7 +22,11 @@ require("dotenv").config();
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      "https://rabustecafe1-cvoionyyj-aayush-097s-projects.vercel.app/"
+    ],
+    credentials: true
   })
 );
 
