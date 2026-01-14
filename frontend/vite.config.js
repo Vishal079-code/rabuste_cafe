@@ -6,6 +6,11 @@ export default defineConfig({
   server: {
     port: 5173,
   },
+  define: {
+    'import.meta.env.VITE_API_BASE': JSON.stringify(
+      process.env.VITE_API_BASE || 'https://rabuste-backend-dryi.onrender.com/api'
+    )
+  }
 });
 
 
