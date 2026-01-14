@@ -85,7 +85,7 @@ const AdminMenu = () => {
     setLoadingData(true);
     setError('');
     try {
-      const res = await fetch('http://localhost:5000/debug/menu-full');
+      const res = await fetch(`${API_BASE.replace(/\/api$/, '')}/debug/menu-full`);
       const data = await res.json();
       setMenuData(data);
     } catch (err) {
@@ -127,7 +127,7 @@ const handleSaveEdit = async () => {
     const token = localStorage.getItem('rabuste_token');
 
     const res = await fetch(
-      `http://localhost:5000/api/admin/menu/item/${itemId}`,
+      `${API_BASE}/admin/menu/item/${itemId}`,
       {
         method: 'PUT',
         headers: {
@@ -169,7 +169,7 @@ const handleSaveEdit = async () => {
 
     try {
       const token = localStorage.getItem('rabuste_token');
-      const res = await fetch(`http://localhost:5000/api/admin/menu/item/${itemId}`, {
+      const res = await fetch(`${API_BASE}/admin/menu/item/${itemId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
