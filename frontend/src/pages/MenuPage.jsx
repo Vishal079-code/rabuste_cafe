@@ -41,7 +41,7 @@ const MenuPage = () => {
         setMenuImages(grouped);
       } catch (err) {
         setError(
-          'Cannot reach Rabuste API. Start backend at http://localhost:5000'
+          'Cannot reach Rabuste API. Check backend configuration.'
         );
       } finally {
         setLoading(false);

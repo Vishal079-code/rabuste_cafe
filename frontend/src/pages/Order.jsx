@@ -118,7 +118,8 @@ const Order = () => {
   useEffect(() => {
     const fetchMenu = async () => {
       try {
-        const res = await fetch('http://localhost:5000/debug/menu-full');
+        const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:5000/api';
+        const res = await fetch(`${apiBase.replace(/\/api$/, '')}/debug/menu-full`);
         const data = await res.json();
         
         console.log('📥 MENU DATA FETCHED:');

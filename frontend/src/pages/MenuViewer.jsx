@@ -77,7 +77,9 @@ export default function MenuViewer() {
   const contentScope = useRef(null);
 
   useEffect(() => {
-    fetch("http://localhost:5000/debug/menu-full")
+    const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:5000/api';
+    const debugUrl = `${apiBase.replace(/\/api$/, '')}/debug/menu-full`;
+    fetch(debugUrl)
       .then((r) => r.json())
       .then(setData);
   }, []);
