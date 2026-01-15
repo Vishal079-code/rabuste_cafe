@@ -201,7 +201,7 @@ return (
     ))}
   </div>
 );
-
+}
  {/*} return (
     <div className="menu-viewer-root" ref={contentScope}>
       <div className="menu-controls">
