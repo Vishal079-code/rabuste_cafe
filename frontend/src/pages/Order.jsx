@@ -4,7 +4,7 @@ import { createOrder, getCart, addToCart, updateCart, removeFromCart, clearCart 
 import '../styles/Order.css';
 
 /* ================= API CONFIG ================= */
-const API_BASE = import.meta.env.VITE_API_BASE;
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000/api';
 console.log('🔗 Order API_BASE:', API_BASE);
 
 // Category ID mapping (matching MenuViewer)
@@ -175,47 +175,42 @@ const Order = () => {
 
   // Fetch menu data
   useEffect(() => {
-  const fetchMenu = async () => {
-    try {
-      const debugUrl = "https://rabuste-backend-dryi.onrender.com/debug/menu-full";
-      console.log('📥 Order: Fetching from', debugUrl);
+    const fetchMenuData = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const res = await fetch(`${API_BASE.replace(/\/api$/, '')}/debug/menu-full`);
+        const data = await res.json();
+        
+        console.log('✅ Order: Menu loaded -', {
+          categories: data.categories?.length,
+          items: data.items?.length
+        });
 
-      const res = await fetch(debugUrl);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const normalized = normalizeMenuData(data);
+        setMenuData(normalized);
 
-      const data = await res.json();
+        // Set default category
+        if (data.categories?.length > 0) {
+          const firstCat =
+            data.categories.find(c => c.isActive !== false) || data.categories[0];
 
-      console.log('✅ Order Menu Loaded:', {
-        categories: data.categories?.length,
-        subCategories: data.subCategories?.length,
-        items: data.items?.length
-      });
+          const categoryStringId =
+            CATEGORY_ID_MAP[firstCat.name] ||
+            firstCat.name.toLowerCase().replace(/\s+/g, '_');
 
-      const normalized = normalizeMenuData(data);
-      setMenuData(normalized);
-
-      // Set default category
-      if (data.categories?.length > 0) {
-        const firstCat =
-          data.categories.find(c => c.isActive !== false) || data.categories[0];
-
-        const categoryStringId =
-          CATEGORY_ID_MAP[firstCat.name] ||
-          firstCat.name.toLowerCase().replace(/\s+/g, '_');
-
-        setSelectedCategory(categoryStringId);
+          setSelectedCategory(categoryStringId);
+        }
+      } catch (err) {
+        setError('Failed to load menu data');
+        console.error(err);
+      } finally {
+        setLoading(false);
       }
+    };
 
-    } catch (err) {
-      console.error('❌ Order menu fetch failed:', err);
-      setError('Failed to load menu. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchMenu();
-}, []);
+    fetchMenuData();
+  }, []);
 
   // Reset subcategory when category changes
   useEffect(() => {
