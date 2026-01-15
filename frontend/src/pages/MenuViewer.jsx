@@ -110,36 +110,39 @@ useEffect(() => {
 }, []);
 
   useLayoutEffect(() => {
-  const ctx = gsap.context(() => {
+  if (!data.items || data.items.length === 0) return;
 
-    /* ===== SECTION STAGGER ===== */
-    gsap.from(".menu-section-group", {
+  const ctx = gsap.context(() => {
+    const sections = document.querySelectorAll(".menu-section-group");
+    const entries = document.querySelectorAll(".menu-entry");
+
+    if (!sections.length || !entries.length) return;
+
+    gsap.from(sections, {
       y: 30,
       opacity: 0,
       duration: 0.7,
       ease: "power3.out",
       stagger: {
         each: 0.12,
-        from: "start"
-      }
+        from: "start",
+      },
     });
 
-    /* ===== ITEM STAGGER (INSIDE SECTIONS) ===== */
-    gsap.from(".menu-entry", {
+    gsap.from(entries, {
       y: 18,
       opacity: 0,
       duration: 0.45,
       ease: "power2.out",
       stagger: {
-        each: 0.05
+        each: 0.05,
       },
-      delay: 0.25   // waits until section starts appearing
+      delay: 0.25,
     });
-
   }, contentScope);
 
   return () => ctx.revert();
-}, [index, data]);
+}, [index, data.items.length]);
 
   const handlePageTurn = (direction) => {
     if (isAnimating) return;
