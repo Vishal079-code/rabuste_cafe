@@ -174,8 +174,35 @@ useEffect(() => {
       })
       .to(overlayShadowRef.current, { opacity: 0.4, duration: 0.5 }, 0);
   };
+return (
+  <div ref={contentScope} style={{ padding: 40, color: "white" }}>
+    <h1>MENU DEBUG</h1>
 
-  return (
+    {data.items.length === 0 && (
+      <p style={{ color: "red" }}>No menu items loaded</p>
+    )}
+
+    {data.items.map((item) => (
+      <div
+        key={item._id}
+        className="menu-section-group"
+        style={{
+          borderBottom: "1px solid #555",
+          marginBottom: 16,
+          paddingBottom: 12
+        }}
+      >
+        <div className="menu-entry">
+          <h3>{item.name}</h3>
+          <p>₹{item.prices?.[0]?.price}</p>
+          <small>{item.categoryId} / {item.subCategoryId}</small>
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+ {/*} return (
     <div className="menu-viewer-root" ref={contentScope}>
       <div className="menu-controls">
         <button className="nav-arrow" onClick={() => handlePageTurn("prev")}>‹</button>
@@ -211,7 +238,7 @@ useEffect(() => {
     </div>
   );
 }
-
+*/}
 /* ================= MENU CONTENT (PART-1 LOGIC) ================= */
 
 function MenuContent({ data, categoryId }) {
