@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useLayoutEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import gsap from "gsap";
 import "../styles/MenuViewer.css";
 
@@ -109,7 +109,7 @@ useEffect(() => {
     });
 }, []);
 
-  useLayoutEffect(() => {
+useEffect(() => {
   if (!data.items || data.items.length === 0) return;
 
   const ctx = gsap.context(() => {
