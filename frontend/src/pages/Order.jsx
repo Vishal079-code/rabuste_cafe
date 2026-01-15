@@ -120,33 +120,39 @@ const Order = () => {
 }, [user]);
 
   // Fetch menu data
-useEffect(() => {
-  const fetchMenu = async () => {
-    try {
-      console.log('📥 Order: Fetching from', `${API_BASE}/debug/menu-full`);
-
-      const res = await fetch(`${API_BASE}/debug/menu-full`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-      const data = await res.json();
-
-      console.log('✅ Order menu loaded:', {
-        categories: data.categories?.length,
-        subCategories: data.subCategories?.length,
-        items: data.items?.length,
-      });
-
-      setMenuData(data);
-    } catch (err) {
-      console.error('❌ Order menu fetch failed:', err);
-      setError('Failed to load menu. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchMenu();
-}, []);
+  useEffect(() => {
+    const fetchMenu = async () => {
+      try {
+        const debugUrl = `${API_BASE}/debug/menu-full`;
+        console.log('📥 Order: Fetching from', debugUrl);
+        
+        const res = await fetch(debugUrl);
+        if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch menu`);
+        
+        const data = await res.json();
+        
+        console.log('✅ Order: Menu loaded -', {
+          categories: data.categories?.length,
+          items: data.items?.length
+        });
+        
+        setMenuData(data);
+        // Set first active category's string ID (e.g., "cat_robusta")
+        if (data.categories && data.categories.length > 0) {
+          const firstCat = data.categories.find(c => c.isActive !== false) || data.categories[0];
+          const categoryName = firstCat.name;
+          const categoryStringId = CATEGORY_ID_MAP[categoryName] || categoryName.toLowerCase().replace(/\s+/g, '_');
+          setSelectedCategory(categoryStringId);
+        }
+      } catch (err) {
+        setError('Failed to load menu. Please try again later.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchMenu();
+  }, []);
 
   // Reset subcategory when category changes
   useEffect(() => {
