@@ -79,22 +79,33 @@ export default function MenuViewer() {
 useEffect(() => {
   const apiBase = import.meta.env.VITE_API_BASE;
 
+  console.log("🔍 VITE_API_BASE =", apiBase);
+
   if (!apiBase) {
-    console.error("VITE_API_BASE is not defined");
+    console.error("❌ VITE_API_BASE is missing");
     return;
   }
 
-  // remove /api only for this debug route
   const backendBase = apiBase.replace(/\/api$/, '');
+  const url = `${backendBase}/debug/menu-full`;
 
-  fetch(`${backendBase}/debug/menu-full`)
+  console.log("🌍 Fetching menu from:", url);
+
+  fetch(url)
     .then((r) => {
-      if (!r.ok) throw new Error("Menu fetch failed");
+      console.log("📡 Response status:", r.status);
+      if (!r.ok) throw new Error("HTTP " + r.status);
       return r.json();
     })
-    .then(setData)
+    .then((data) => {
+      console.log("✅ Menu data received:", data);
+      console.log("📦 categories:", data.categories?.length);
+      console.log("📦 subCategories:", data.subCategories?.length);
+      console.log("📦 items:", data.items?.length);
+      setData(data);
+    })
     .catch((err) => {
-      console.error("Menu fetch error:", err);
+      console.error("❌ Menu fetch failed:", err);
     });
 }, []);
 
