@@ -51,6 +51,60 @@ function getFinalPrice(item) {
   }
   return { final: base, strike: null, label: null };
 }
+function normalizeMenuData(raw) {
+  const categoryMap = {};
+  const subCategoryMap = {};
+
+  // 1️⃣ Normalize categories
+  const categories = raw.categories.map(cat => {
+    const stringId =
+      CATEGORY_ID_MAP[cat.name] ||
+      cat.name.toLowerCase().replace(/\s+/g, '_');
+
+    categoryMap[String(cat._id)] = stringId;
+
+    return {
+      ...cat,
+      stringId
+    };
+  });
+
+  // 2️⃣ Normalize subcategories
+  const subCategories = raw.subCategories.map(sub => {
+    const categoryStringId = categoryMap[String(sub.categoryId)];
+    const subStringId = buildSubCategoryId(categoryStringId, sub.name);
+
+    subCategoryMap[String(sub._id)] = {
+      categoryStringId,
+      subStringId
+    };
+
+    return {
+      ...sub,
+      category: categoryStringId,   // MenuViewer-compatible
+      subStringId
+    };
+  });
+
+  // 3️⃣ Normalize items
+  const items = raw.items.map(item => {
+    const subInfo = subCategoryMap[String(item.subCategoryId)];
+    if (!subInfo) return null;
+
+    return {
+      ...item,
+      id: item._id,                       // IMPORTANT
+      categoryId: subInfo.categoryStringId,
+      subCategoryId: subInfo.subStringId
+    };
+  }).filter(Boolean);
+
+  return {
+    categories,
+    subCategories,
+    items
+  };
+}
 
 const Order = () => {
   const [menuData, setMenuData] = useState({
@@ -136,7 +190,9 @@ const Order = () => {
           items: data.items?.length
         });
         
-        setMenuData(data);
+       // setMenuData(data);
+       const normalized = normalizeMenuData(data);
+setMenuData(normalized);
         // Set first active category's string ID (e.g., "cat_robusta")
         if (data.categories && data.categories.length > 0) {
           const firstCat = data.categories.find(c => c.isActive !== false) || data.categories[0];
