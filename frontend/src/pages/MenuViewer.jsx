@@ -2,10 +2,6 @@ import { useEffect, useState, useRef, useLayoutEffect } from "react";
 import gsap from "gsap";
 import "../styles/MenuViewer.css";
 
-/* ================= API CONFIG ================= */
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000/api';
-console.log('🔗 MenuViewer API_BASE:', API_BASE);
-
 /* ================= CONFIG ================= */
 
 const MENU_TABS = [
@@ -80,59 +76,32 @@ export default function MenuViewer() {
   const overlayShadowRef = useRef(null);
   const contentScope = useRef(null);
 
-  useEffect(() => {
-    const fetchMenuData = async () => {
-      try {
-        const debugUrl = `${API_BASE.replace(/\/api$/, '')}/debug/menu-full`;
-        console.log('📥 MenuViewer: Fetching from', debugUrl);
-        
-        const res = await fetch(debugUrl);
-        if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch menu`);
-        
-        const data = await res.json();
-        console.log('✅ MenuViewer: Menu loaded -', data.items?.length || 0, 'items');
-        setData(data);
-      } catch (err) {
-        console.error('❌ MenuViewer: Menu fetch error:', err);
-      }
-    };
-    
-    fetchMenuData();
-  }, []);
+useEffect(() => {
+  const apiBase = import.meta.env.VITE_API_BASE;
 
-useLayoutEffect(() => {
-  if (!data.subCategories.length || !data.items.length) return;
+  if (!apiBase) {
+    console.error("VITE_API_BASE is not defined");
+    return;
+  }
 
-  const ctx = gsap.context(() => {
-    const sections = gsap.utils.toArray(".menu-section-group");
-    const entries = gsap.utils.toArray(".menu-entry");
+  // remove /api only for this debug route
+  const backendBase = apiBase.replace(/\/api$/, '');
 
-    if (!sections.length || !entries.length) return;
-
-    gsap.from(sections, {
-      y: 30,
-      opacity: 0,
-      duration: 0.7,
-      ease: "power3.out",
-      stagger: 0.12
+  fetch(`${backendBase}/debug/menu-full`)
+    .then((r) => {
+      if (!r.ok) throw new Error("Menu fetch failed");
+      return r.json();
+    })
+    .then(setData)
+    .catch((err) => {
+      console.error("Menu fetch error:", err);
     });
+}, []);
 
-    gsap.from(entries, {
-      y: 18,
-      opacity: 0,
-      duration: 0.45,
-      ease: "power2.out",
-      stagger: 0.05,
-      delay: 0.2
-    });
-  }, contentScope);
-
-  return () => ctx.revert();
-}, [index, data]);
-
- {/*useLayoutEffect(() => {
+  useLayoutEffect(() => {
   const ctx = gsap.context(() => {
 
+    /* ===== SECTION STAGGER ===== */
     gsap.from(".menu-section-group", {
       y: 30,
       opacity: 0,
@@ -144,6 +113,7 @@ useLayoutEffect(() => {
       }
     });
 
+    /* ===== ITEM STAGGER (INSIDE SECTIONS) ===== */
     gsap.from(".menu-entry", {
       y: 18,
       opacity: 0,
@@ -152,13 +122,13 @@ useLayoutEffect(() => {
       stagger: {
         each: 0.05
       },
-      delay: 0.25   
+      delay: 0.25   // waits until section starts appearing
     });
 
   }, contentScope);
 
   return () => ctx.revert();
-}, [index, data]);*/}
+}, [index, data]);
 
   const handlePageTurn = (direction) => {
     if (isAnimating) return;
@@ -242,17 +212,11 @@ function MenuContent({ data, categoryId }) {
             .map((sub) => {
               const subId = buildSubCategoryId(categoryId, sub.name);
 
-              {/*const items = data.items.filter(
+              const items = data.items.filter(
                 (i) =>
                   i.categoryId === categoryId &&
                   i.subCategoryId === subId
-              );*/}
-              const items = data.items.filter(
-  (i) =>
-    (i.categoryId || i.category) === categoryId &&
-    (i.subCategoryId || i.subCategory) === subId
-);
-
+              );
 
               if (!items.length) return null;
 
@@ -278,8 +242,7 @@ function MenuContent({ data, categoryId }) {
 
                         return (
                           <div
-                            //key={item.id}
-                            key={item._id || item.id}
+                            key={item.id}
                             className="menu-entry"
                             style={{
                               opacity: item.isActive === false ? 0.4 : 1
