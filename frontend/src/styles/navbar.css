@@ -395,4 +395,75 @@
 @keyframes idleSweepB {
   from { background-position: 160% 50%; }
   to { background-position: -160% 50%; }
+}/* ================= MOBILE MENU ================= */
+.mobile-menu-btn {
+  display: none;
+  font-size: 26px;
+  color: #f1a45c;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.mobile-close-btn {
+  display: none;
+}
+
+/* ===== MOBILE DRAWER ===== */
+@media (max-width: 768px) {
+  .top-bar {
+    flex-direction: row;
+  }
+
+  .mobile-menu-btn {
+    display: block;
+  }
+
+  .chip-nav {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    height: 100vh;
+    width: 85%;
+    max-width: 360px;
+    background: linear-gradient(
+      180deg,
+      rgba(20, 14, 10, 0.99),
+      rgba(12, 10, 8, 0.98)
+    );
+    flex-direction: column;
+    padding: 80px 24px 24px;
+    gap: 14px;
+    transition: right 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: -20px 0 60px rgba(0, 0, 0, 0.8);
+    z-index: 2000;
+  }
+
+  .chip-nav.open {
+    right: 0;
+  }
+
+  .mobile-close-btn {
+    display: block;
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    font-size: 26px;
+    background: none;
+    border: none;
+    color: #f1a45c;
+    cursor: pointer;
+  }
+
+  .nav-button {
+    width: 100%;
+    justify-content: center;
+    font-size: 14px;
+    padding: 14px;
+  }
+
+  .profile-wrapper {
+    margin-top: 20px;
+    justify-content: center;
+  }
 }

@@ -4,7 +4,7 @@ import { createOrder, getCart, addToCart, updateCart, removeFromCart, clearCart 
 import '../styles/Order.css';
 
 /* ================= API CONFIG ================= */
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_BASE;
 console.log('🔗 Order API_BASE:', API_BASE);
 
 // Category ID mapping (matching MenuViewer)
@@ -175,40 +175,47 @@ const Order = () => {
 
   // Fetch menu data
   useEffect(() => {
-    const fetchMenu = async () => {
-      try {
-        const debugUrl = `${API_BASE}/debug/menu-full`;
-        console.log('📥 Order: Fetching from', debugUrl);
-        
-        const res = await fetch(debugUrl);
-        if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch menu`);
-        
-        const data = await res.json();
-        
-        console.log('✅ Order: Menu loaded -', {
-          categories: data.categories?.length,
-          items: data.items?.length
-        });
-        
-       // setMenuData(data);
-       const normalized = normalizeMenuData(data);
-setMenuData(normalized);
-        // Set first active category's string ID (e.g., "cat_robusta")
-        if (data.categories && data.categories.length > 0) {
-          const firstCat = data.categories.find(c => c.isActive !== false) || data.categories[0];
-          const categoryName = firstCat.name;
-          const categoryStringId = CATEGORY_ID_MAP[categoryName] || categoryName.toLowerCase().replace(/\s+/g, '_');
-          setSelectedCategory(categoryStringId);
-        }
-      } catch (err) {
-        setError('Failed to load menu. Please try again later.');
-        console.error(err);
-      } finally {
-        setLoading(false);
+  const fetchMenu = async () => {
+    try {
+      const debugUrl = "https://rabuste-backend-dryi.onrender.com/debug/menu-full";
+      console.log('📥 Order: Fetching from', debugUrl);
+
+      const res = await fetch(debugUrl);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const data = await res.json();
+
+      console.log('✅ Order Menu Loaded:', {
+        categories: data.categories?.length,
+        subCategories: data.subCategories?.length,
+        items: data.items?.length
+      });
+
+      const normalized = normalizeMenuData(data);
+      setMenuData(normalized);
+
+      // Set default category
+      if (data.categories?.length > 0) {
+        const firstCat =
+          data.categories.find(c => c.isActive !== false) || data.categories[0];
+
+        const categoryStringId =
+          CATEGORY_ID_MAP[firstCat.name] ||
+          firstCat.name.toLowerCase().replace(/\s+/g, '_');
+
+        setSelectedCategory(categoryStringId);
       }
-    };
-    fetchMenu();
-  }, []);
+
+    } catch (err) {
+      console.error('❌ Order menu fetch failed:', err);
+      setError('Failed to load menu. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchMenu();
+}, []);
 
   // Reset subcategory when category changes
   useEffect(() => {
