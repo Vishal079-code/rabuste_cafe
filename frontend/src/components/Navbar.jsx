@@ -1,4 +1,4 @@
-import { useEffect, useRef,useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import HandwrittenText from "../components/HandwrittenText";
 import { fetchMenuImages } from "../services/api";
@@ -6,16 +6,17 @@ import { useAuth } from "../context/AuthContext";
 import gsap from "gsap";
 import "../styles/navbar.css";
 
-
 const Navbar = () => {
   const [openProfile, setOpenProfile] = useState(false);
-const profileRef = useRef(null);
+  const [mobileOpen, setMobileOpen] = useState(false); // ✅ MOBILE STATE
+  const profileRef = useRef(null);
   const [logoUrl, setLogoUrl] = useState(null);
 
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const navRootRef = useRef(null);
 
+  /* ================= LOGO FETCH ================= */
   useEffect(() => {
     let mounted = true;
     fetchMenuImages()
@@ -41,9 +42,11 @@ const profileRef = useRef(null);
 
   const handleLogout = () => {
     logout();
+    setMobileOpen(false);
     navigate("/");
   };
 
+  /* ================= GSAP ORB EFFECT ================= */
   useEffect(() => {
     const root = navRootRef.current;
     if (!root) return;
@@ -63,14 +66,7 @@ const profileRef = useRef(null);
         xTo(e.clientX - rect.left);
         yTo(e.clientY - rect.top);
 
-        gsap.to(orb, {
-          scale: 2.2,
-          opacity: 1,
-          duration: 0.2,
-        });
-
-        
-
+        gsap.to(orb, { scale: 2.2, opacity: 1, duration: 0.2 });
         gsap.to(btn, {
           scale: 1.08,
           boxShadow: "0 0 35px rgba(216,107,50,0.6)",
@@ -80,121 +76,147 @@ const profileRef = useRef(null);
 
       const leave = () => {
         gsap.to(orb, { scale: 0, opacity: 0, duration: 0.3 });
-        gsap.to(btn, { scale: 1, boxShadow: "0 3px 10px rgba(0,0,0,0.3)" });
+        gsap.to(btn, {
+          scale: 1,
+          boxShadow: "0 3px 10px rgba(0,0,0,0.3)",
+        });
         if (text) gsap.to(text, { color: "#f5efe8", duration: 0.2 });
       };
 
       btn.addEventListener("mousemove", move);
       btn.addEventListener("mouseleave", leave);
 
-      // store cleanup on element
       btn._cleanup = () => {
         btn.removeEventListener("mousemove", move);
         btn.removeEventListener("mouseleave", leave);
       };
     });
-    
+
     return () => {
       buttons.forEach((btn) => btn._cleanup?.());
     };
   }, [user]);
- useEffect(() => {
-  const buttons = document.querySelectorAll(".nav-button");
 
-  buttons.forEach((btn) => {
-    const text = btn.querySelector(".nav-text");
-    if (!text || text.dataset.split) return;
+  /* ================= TEXT SPLIT EFFECT ================= */
+  useEffect(() => {
+    const buttons = document.querySelectorAll(".nav-button");
 
-    text.dataset.split = "true";
+    buttons.forEach((btn) => {
+      const text = btn.querySelector(".nav-text");
+      if (!text || text.dataset.split) return;
 
-    const letters = text.textContent.split("");
-    text.innerHTML = letters
-      .map(
-        (l) =>
-          `<span class="nav-letter">${l === " " ? "&nbsp;" : l}</span>`
-      )
-      .join("");
+      text.dataset.split = "true";
 
-    const lettersEls = text.querySelectorAll(".nav-letter");
+      const letters = text.textContent.split("");
+      text.innerHTML = letters
+        .map(
+          (l) =>
+            `<span class="nav-letter">${l === " " ? "&nbsp;" : l}</span>`
+        )
+        .join("");
 
-    btn.addEventListener("mouseenter", () => {
-      gsap.fromTo(
-        lettersEls,
-        {
-          filter: "blur(2px)",
-          opacity: 0.6,
-          textShadow: "0 0 0 rgba(216,107,50,0)",
-        },
-        {
-          filter: "blur(0px)",
-          opacity: 1,
-          textShadow: "0 0 12px rgba(216,107,50,0.6)",
-          duration: 0.45,
-          ease: "power2.out",
-          stagger: 0, // simultaneous
-        }
-      );
+      const lettersEls = text.querySelectorAll(".nav-letter");
+
+      btn.addEventListener("mouseenter", () => {
+        gsap.fromTo(
+          lettersEls,
+          {
+            filter: "blur(2px)",
+            opacity: 0.6,
+            textShadow: "0 0 0 rgba(216,107,50,0)",
+          },
+          {
+            filter: "blur(0px)",
+            opacity: 1,
+            textShadow: "0 0 12px rgba(216,107,50,0.6)",
+            duration: 0.45,
+            ease: "power2.out",
+            stagger: 0,
+          }
+        );
+      });
     });
-  });
-}, []);
+  }, []);
 
   return (
     <header className="top-bar">
+      {/* LOGO */}
       <NavLink to="/" className="logo handwritten-logo">
-        {logoUrl && <img src={logoUrl} alt="Rabuste logo" className="nav-logo" />}
-        {/*<HandwrittenText text=" Rabuste " />*/}
+        {logoUrl && (
+          <img src={logoUrl} alt="Rabuste logo" className="nav-logo" />
+        )}
+        {/* <HandwrittenText text=" Rabuste " /> */}
       </NavLink>
 
+      {/* MOBILE HAMBURGER */}
+      <button
+        className="mobile-menu-btn"
+        onClick={() => setMobileOpen(true)}
+      >
+        ☰
+      </button>
 
-      <nav className="chip-nav" ref={navRootRef}>
-        <NavLink to="/" end className="nav-button">
+      {/* NAV */}
+      <nav
+        className={`chip-nav ${mobileOpen ? "open" : ""}`}
+        ref={navRootRef}
+      >
+        {/* MOBILE CLOSE */}
+        <button
+          className="mobile-close-btn"
+          onClick={() => setMobileOpen(false)}
+        >
+          ✕
+        </button>
+
+        <NavLink to="/" end className="nav-button" onClick={() => setMobileOpen(false)}>
           <span className="nav-text">Home</span>
           <span className="hover-orb" />
         </NavLink>
 
-        <NavLink to="/why-robusta" className="nav-button">
+        <NavLink to="/why-robusta" className="nav-button" onClick={() => setMobileOpen(false)}>
           <span className="nav-text">Why Robusta</span>
           <span className="hover-orb" />
         </NavLink>
 
-        <NavLink to="/menu" className="nav-button">
+        <NavLink to="/menu" className="nav-button" onClick={() => setMobileOpen(false)}>
           <span className="nav-text">Menu</span>
           <span className="hover-orb" />
         </NavLink>
 
-        <NavLink to="/order" className="nav-button">
+        <NavLink to="/order" className="nav-button" onClick={() => setMobileOpen(false)}>
           <span className="nav-text">Order</span>
           <span className="hover-orb" />
         </NavLink>
 
-        <NavLink to="/art" className="nav-button">
+        <NavLink to="/art" className="nav-button" onClick={() => setMobileOpen(false)}>
           <span className="nav-text">Art</span>
           <span className="hover-orb" />
         </NavLink>
 
-        <NavLink to="/workshops" className="nav-button">
+        <NavLink to="/workshops" className="nav-button" onClick={() => setMobileOpen(false)}>
           <span className="nav-text">Workshops</span>
           <span className="hover-orb" />
         </NavLink>
 
-        <NavLink to="/franchise" className="nav-button">
+        <NavLink to="/franchise" className="nav-button" onClick={() => setMobileOpen(false)}>
           <span className="nav-text">Franchise</span>
           <span className="hover-orb" />
         </NavLink>
 
-        <NavLink to="/ai-experience" className="nav-button">
+        <NavLink to="/ai-experience" className="nav-button" onClick={() => setMobileOpen(false)}>
           <span className="nav-text">brew.ai</span>
           <span className="hover-orb" />
         </NavLink>
 
         {!user && (
           <>
-            <NavLink to="/login" className="nav-button">
+            <NavLink to="/login" className="nav-button" onClick={() => setMobileOpen(false)}>
               <span className="nav-text">Login</span>
               <span className="hover-orb" />
             </NavLink>
 
-            <NavLink to="/signup" className="nav-button">
+            <NavLink to="/signup" className="nav-button" onClick={() => setMobileOpen(false)}>
               <span className="nav-text">Signup</span>
               <span className="hover-orb" />
             </NavLink>
@@ -202,35 +224,32 @@ const profileRef = useRef(null);
         )}
 
         {user?.role === "admin" && (
-          <NavLink to="/admin" className="nav-button">
+          <NavLink to="/admin" className="nav-button" onClick={() => setMobileOpen(false)}>
             <span className="nav-text">Admin</span>
             <span className="hover-orb" />
           </NavLink>
         )}
-       {user && (
-  <div className="profile-wrapper" ref={profileRef}>
-    <button
-      className="nav-button profile-btn"
-      onClick={() => setOpenProfile((p) => !p)}
-    >
-      <span className="profile-icon">👤</span>
-      <span className="hover-orb" />
-    </button>
 
-    {openProfile && (
-      <div className="profile-dropdown">
-        <button className="dropdown-item" onClick={handleLogout}>
-          <span className="logout-icon">🚪</span>
-          Logout
-        </button>
-      </div>
-    )}
-  </div>
-)}
+        {user && (
+          <div className="profile-wrapper" ref={profileRef}>
+            <button
+              className="nav-button profile-btn"
+              onClick={() => setOpenProfile((p) => !p)}
+            >
+              <span className="profile-icon">👤</span>
+              <span className="hover-orb" />
+            </button>
 
-        
-        
-
+            {openProfile && (
+              <div className="profile-dropdown">
+                <button className="dropdown-item" onClick={handleLogout}>
+                  <span className="logout-icon">🚪</span>
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </nav>
     </header>
   );
