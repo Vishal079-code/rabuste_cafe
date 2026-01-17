@@ -277,17 +277,24 @@ const normalizeCart = (resData) => {
 
     // ✅ DEFINE res HERE
     const res = await addToCart({
-      itemId: itemId,
-      quantity: 1
-    });
+  itemId: itemId,
+  quantity: 1
+});
 
-    // ✅ DEBUG LOG (now valid)
-    console.log('ADD TO CART RESPONSE:', res.data);
+// 🔥 DO NOT use addToCart response
+// 🔥 Always reload full cart
+const cartRes = await getCart();
+const data = cartRes.data.data;
 
-    // ✅ Update cart properly
-    const normalized = normalizeCart(res.data);
-    console.log('Normalized cart:', normalized);
-    setCart(normalized);
+const mapped = (data.items || []).map(ci => ({
+  itemId: typeof ci.item === 'object' ? ci.item._id : ci.item,
+  name: ci.item?.name || 'Item',
+  price: ci.item?.prices?.[0]?.price || 0,
+  quantity: ci.quantity
+}));
+
+setCart(mapped);
+
 
   } catch (err) {
     console.error('Add to cart error:', err);
@@ -326,14 +333,38 @@ const normalizeCart = (resData) => {
       if (!existing) return;
       const newQty = existing.quantity + delta;
       if (newQty <= 0) {
-        const res = await updateCart({ itemId, quantity: 0 });
-        const normalized = normalizeCart(res.data);
-        setCart(normalized);
+        await updateCart({ itemId, quantity: newQty });
+
+// 🔥 ALWAYS reload full cart after update
+const cartRes = await getCart();
+const data = cartRes.data.data;
+
+const mapped = (data.items || []).map(ci => ({
+  itemId: typeof ci.item === 'object' ? ci.item._id : ci.item,
+  name: ci.item?.name || 'Item',
+  price: ci.item?.prices?.[0]?.price || 0,
+  quantity: ci.quantity
+}));
+
+setCart(mapped);
+
         return;
       }
-      const res = await updateCart({ itemId, quantity: newQty });
-      const normalized = normalizeCart(res.data);
-      setCart(normalized);
+      await updateCart({ itemId, quantity: newQty });
+
+// 🔥 ALWAYS reload full cart after update
+const cartRes = await getCart();
+const data = cartRes.data.data;
+
+const mapped = (data.items || []).map(ci => ({
+  itemId: typeof ci.item === 'object' ? ci.item._id : ci.item,
+  name: ci.item?.name || 'Item',
+  price: ci.item?.prices?.[0]?.price || 0,
+  quantity: ci.quantity
+}));
+
+setCart(mapped);
+
     } catch (err) {
       setError(err?.response?.data?.message || 'Failed to update cart');
     }
