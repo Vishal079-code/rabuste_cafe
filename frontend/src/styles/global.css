@@ -1450,3 +1450,10 @@ a:not(.cta):hover {
     font-size: 1.5rem;
   }
 }
+/* 🔥 MOBILE SCROLL FAILSAFE */
+@media (max-width: 768px) {
+  .page [data-scroll-section] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
